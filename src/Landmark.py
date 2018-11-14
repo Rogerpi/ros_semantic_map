@@ -163,7 +163,7 @@ class Landmark:
                 response.moved = 1
             else:
                 response.moved = 0
-        elif: #Just for saving expected values, never mapped, never seen
+        else: #Just for saving expected values, never mapped, never seen
             response.moved = 2
 
         return response
