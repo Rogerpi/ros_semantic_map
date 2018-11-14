@@ -33,15 +33,29 @@ from tf import TransformListener
 # Landmark represents an object
 # -----------------------------------------------------------------------------------#
 class Landmark:
-    def __init__(self,id,pose,room = "" , seen=False, furniture = "" ):
+    def __init__(self,id,pose,room = "" , mapped=False, seen=False, furniture = "" ):
         self.id = id
 
-        #If detected
-        self.pose = pose
-        self.room = room # string or object?
-        self.furniture = furniture #string or object?
-
+        self.mapped = mapped
         self.seen = seen
+        #If detected
+
+        self.pose = []
+        self.room = ''
+        self.furniture = ''
+        self.mapped_pose = ''
+        self.mapped_room = ''
+        self.mapped_furniture = ''
+
+        if self.seen:
+            self.pose = pose
+            self.room = room # string or object?
+            self.furniture = furniture #string or object?
+
+        if self.mapped:
+            self.mapped_pose = pose
+            self.mapped_room = room
+            self.mapped_furniture = furniture
 
         #GUESS
 
@@ -63,12 +77,13 @@ class Landmark:
 
     def set_position(self,pose):
         self.pose = pose
+        self.seen = True
 
     def set_place(self,furniture):
         self.furniture = furniture
 
-    def set_seen(self,seen):
-        self.seen = seen
+    #def set_seen(self,seen):
+    #    self.seen = seen
 
     def set_expected_rooms(self,rooms):
         self.expected_rooms = rooms
@@ -114,8 +129,9 @@ class Landmark:
             print("Goal finished")
             return client.get_result()
 
-    def get_marker(self):
 
+
+    def get_seen_marker(self,r=1.0,g=0.0,b=0.0,a=1.0):
         #Sphere as position
         marker = Marker()
         marker.header.frame_id = self.frame_id
@@ -125,14 +141,11 @@ class Landmark:
         marker.scale.y = 0.08
         marker.scale.z = 0.08
 
-        marker.color.a = 1.0
-        marker.color.r = 1.0
-        marker.color.g = 0.0
-        marker.color.b = 0.0
+        marker.color.a = a
+        marker.color.r = r
+        marker.color.g = g
+        marker.color.b = b
 
-        if not self.seen:
-            marker.color.a = 0.5
-            marker.color.r = 0.8
 
         marker.pose.position.x = self.pose[0]
         marker.pose.position.y = self.pose[1]
@@ -148,15 +161,66 @@ class Landmark:
 
         text.scale.z = 0.2
 
-        text.color.a = 1.0
-        text.color.r = 0.8
+        text.color.a = a
+        text.color.r = r
+        text.color.g = g
+        text.color.b = b
+
         text.pose.position.x = self.pose[0]
         text.pose.position.y = self.pose[1]
         text.pose.position.z = self.pose[2] + 0.1
         text.ns = self.id+"_name"
-        text.text = self.id
-        if not self.seen:
-            text.text = text.text+" (NOT SEEN)"
+        text.text = "DETECTED "+self.id
+
+        text.id = 1
+
+        #So the markers gets deleted from RVIZ if they are not published
+        marker.lifetime.secs = 2
+        text.lifetime.secs = 2
+
+        return marker, text
+
+    def get_map_marker(self,r=0.0,g=0.0,b=1.0,a=1.0):
+        #Sphere as position
+        marker = Marker()
+        marker.header.frame_id = self.frame_id
+        marker.type = marker.CUBE
+        marker.action = marker.ADD
+        marker.scale.x = 0.08
+        marker.scale.y = 0.08
+        marker.scale.z = 0.08
+
+        marker.color.a = a
+        marker.color.r = r
+        marker.color.g = g
+        marker.color.b = b
+
+
+        marker.pose.position.x = self.mapped_pose[0]
+        marker.pose.position.y = self.mapped_pose[1]
+        marker.pose.position.z = self.mapped_pose[2]
+        marker.ns = self.id
+        marker.id = 0
+
+        #Show text above
+        text = Marker()
+        text.header.frame_id = self.frame_id
+        text.type =Marker.TEXT_VIEW_FACING
+        text.action = Marker.ADD
+
+        text.scale.z = 0.2
+
+        text.color.a = a
+        text.color.r = r
+        text.color.g = g
+        text.color.b = b
+
+        text.pose.position.x = self.mapped_pose[0]
+        text.pose.position.y = self.mapped_pose[1]
+        text.pose.position.z = self.mapped_pose[2] + 0.1
+        text.ns = self.id+"_name"
+        text.text = "MAP "+self.id
+
         text.id = 1
 
         #So the markers gets deleted from RVIZ if they are not published

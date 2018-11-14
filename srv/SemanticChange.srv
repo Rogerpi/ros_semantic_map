@@ -1,10 +1,11 @@
 string object_id
 ---
 bool mapped
+bool detected
 uint8 moved # 0 No, 1 Yes, 2 Unknown
-float64[] previous_position
-string previous_furniture
-string previous_room
+float64[] mapped_position
+string mapped_furniture
+string mapped_room
 float64[] current_position
 string current_furniture
 string current_room
