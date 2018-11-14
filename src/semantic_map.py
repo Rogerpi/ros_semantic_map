@@ -13,6 +13,7 @@ from geometry_msgs.msg import PoseStamped, Pose, Point
 from tf2_msgs.msg import TFMessage
 
 from robot_map.msg import Detection
+from robot_map.msg import Object, ObjectArray
 
 #Actions
 import actionlib
@@ -21,6 +22,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 # Services
 from std_srvs.srv import Empty, EmptyResponse
 from robot_map.srv import SemanticGoal, SemanticGoalResponse
+from robot_map.srv import SemanticChange, SemanticChangeResponse
 
 # Others
 from tf import TransformListener
@@ -28,6 +30,7 @@ from tf import TransformListener
 from Landmark import Landmark
 from Region import Region
 from Waypoint import Waypoint
+from Furniture import Furniture
 
 #from Path import Path
 #from Furniture import Furniture
@@ -41,8 +44,12 @@ class Semantic_Map:
          self.current_map = [] #Landmark
          self.last_map = [] # Landmark
 
+         self.current_furniture = [] # Furniture
+         self.last_furniture = [] #Furniture
+
          self.regions = [] # Regions
          self.waypoints = [] # Waypoints
+
 
          #Publishers
          self.regions_pub = rospy.Publisher('/semantic_map/regions', MarkerArray , queue_size=10)
@@ -60,13 +67,21 @@ class Semantic_Map:
 
          #Services
          self.load_from_param_srv = rospy.Service('/semantic_map/load_from_param', Empty, self.load_from_param)
+
+         #Mapping
          self.finish_mapping_srv = rospy.Service('/semantic_map/save_map', Empty, self.save_map)
+
+         #Navigation
          self.goal_to_waypoint_srv = rospy.Service('/semantic_map/goal_to_waypoint', SemanticGoal, self.go_to_waypoint)
          self.goal_to_landmark_srv = rospy.Service('/semantic_map/goal_to_landmark', SemanticGoal, self.go_to_landmark)
          self.goal_to_region_srv   = rospy.Service('/semantic_map/goal_to_region'  , SemanticGoal, self.go_to_region)
+
+         #Knowledge
+         self.check_object_status_srv   = rospy.Service('/semantic_map/check_object_status'  , SemanticChange, self.check_object_status)
+
          print("Service Server Initialized")
 
-         self.vis_timer = rospy.Timer(rospy.Duration(1), self.publish_markers)
+         self.pub_data_timer = rospy.Timer(rospy.Duration(1), self.publish_data)
 
          print("Ready!")
 
@@ -76,12 +91,12 @@ class Semantic_Map:
          selected = next((x for x in self.current_map if x.id == detection.id), None)
          if selected == None: #NEW LANDMARK
              print("New Landmark "+detection.id+" Added!")
-             landmark = Landmark(detection.id,detection.pose.position.x,detection.pose.position.y,detection.pose.position.z)
+             landmark = Landmark(detection.id,[detection.pose.position.x,detection.pose.position.y,detection.pose.position.z],seen=True)
              self.current_map.append(copy.deepcopy(landmark))
          else:
              print("Landmark "+detection.id+" seen again")
              print("Seting new position (Current Approach)")
-             selected.set_position(detection.pose.position.x,detection.pose.position.y,detection.pose.position.z)
+             selected.set_position([detection.pose.position.x,detection.pose.position.y,detection.pose.position.z],seen=True)
 
 
      def save_map(self,call):
@@ -94,6 +109,56 @@ class Semantic_Map:
          print("Done!")
 
          return EmptyResponse()
+
+
+     def export_map(self,call):
+         pass #TODO
+
+
+
+# --------- DETECT CHANGES ---------------------#
+
+     def check_object_status(self,call):
+
+         response = SemanticChangeResponse()
+         landmark_prev = next((x for x in self.last_map if x.id == call.object_id), None)
+         landmark =  next((x for x in self.map if x.id == call.object_id), None)
+
+         #MOVED: 0 No, 1 Yes, 2 Unknown
+         if landmark_prev == None and landmark == None: # The landmark doesn't exist
+             response.mapped = False
+         elif landmark_prev != None and landmark == None: # Exists but only mapped once
+             response.mapped = True
+             response.moved = 2
+             response.current_position = landmark_prev.get_position()
+             response.current_furniture = landmark_prev.get_furniture()
+             response.current_room = landmark_prev.get_room()
+         elif landmark_prev == None and landmark != None: # Exists but only mapped once
+             response.mapped = True
+             response.moved = 2
+             response.current_position = landmark.get_position()
+             response.current_furniture = landmark.get_furniture()
+             response.current_room = landmark.get_room()
+         elif landmark_prev != None and landmark != None: # Mapped twice, check...
+             #TODO Check position distances
+             response.mapped = True
+             response.moved = 0
+             response.current_position = landmark.get_position()
+             response.current_furniture = landmark.get_furniture()
+             response.current_room = landmark.get_room()
+             response.previous_position = landmark_prev.get_position()
+             response.previous_furniture = landmark_prev.get_furniture()
+             response.previous_room = landmark_prev.get_room()
+
+             if response.current_furniture != response.previous_furniture or response.current_room != response.previous_room:
+                 response.moved = 1
+
+         else:
+             print("[BUG] SMILE (surprise) :)") # wanna play a game?
+
+         return response
+
+
 
 
 #--------- Goals to ----------------------------#
@@ -126,6 +191,9 @@ class Semantic_Map:
              selected.send_goal(self.goal_client)
              response.success = True
          return response
+
+     def follow_path(self,call):
+         pass # TODO
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 #--------- Load from param server --------------#
@@ -133,6 +201,8 @@ class Semantic_Map:
          print("Loading from param server")
          self.get_waypoints("/waypoints")
          self.get_regions("/rooms")
+         self.get_landmarks("/objects")
+         self.get_furniture("/furniture")
          return EmptyResponse()
 
 
@@ -186,6 +256,44 @@ class Semantic_Map:
              self.regions.append(copy.deepcopy(region))
 
 
+
+     def get_landmarks(self,name):
+         landmarks = rospy.get_param(name)
+         for i in range(len(landmarks)):
+             id = landmarks[i].get("name")
+             seen = landmarks[i].get("seen")
+             pose = landmarks[i].get("pose")
+             room = landmarks[i].get("room")
+             furniture = landmarks[i].get("furniture")
+             exp_furniture = landmarks[i].get("expected_furniture")
+             exp_rooms = landmarks[i].get("expected_rooms")
+
+             landmark = Landmark(id,pose,room,seen,furniture)
+             landmark.set_expected_rooms(exp_rooms)
+             landmark.set_expected_furniture(exp_furniture)
+
+             self.last_map.append(copy.deepcopy(landmark))
+
+
+     def get_furniture(self,name):
+         furnitures = rospy.get_param(name)
+         for i in range(len(furnitures)):
+             id = furnitures[i].get("name")
+             seen = furnitures[i].get("seen")
+             static = furnitures[i].get("static")
+             pose = furnitures[i].get("pose")
+             orientation = furnitures[i].get("orientation")
+             room = furnitures[i].get("room")
+             size = furnitures[i].get("size")
+
+             object = Furniture(id,pose,orientation,size,room,seen,static)
+
+
+             self.last_furniture.append(copy.deepcopy(object))
+
+
+     def get_doors(self,name): # Or links?
+         pass #TODO?
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 #--------- Publish Markers for Visualization ---#
@@ -206,14 +314,13 @@ class Semantic_Map:
              ma.markers.append(copy.deepcopy(text))
          self.waypoints_pub.publish(ma)
 
-     def publish_landmarks(self):
+     def publish_landmarks_and_furniture(self):
          #current map
          ma = MarkerArray()
          for i in range(len(self.current_map)):
              bbox, text = self.current_map[i].get_marker()
              ma.markers.append(copy.deepcopy(bbox))
              ma.markers.append(copy.deepcopy(text))
-         self.landmarks_pub.publish(ma)
 
          #previous map
          ma2 = MarkerArray()
@@ -230,15 +337,49 @@ class Semantic_Map:
              ma2.markers[-1].color.b = 1.0
              ma2.markers[-1].ns = ".last_"+ma2.markers[-1].ns
 
+
+         #current map furniture
+         for i in range(len(self.current_furniture)):
+             bbox, text = self.current_furniture[i].get_marker()
+             ma.markers.append(copy.deepcopy(bbox))
+             ma.markers.append(copy.deepcopy(text))
+
+         #previous map furniture
+         for i in range(len(self.last_furniture)):
+             bbox, text = self.last_furniture[i].get_marker()
+             ma2.markers.append(copy.deepcopy(bbox))
+             ma2.markers.append(copy.deepcopy(text))
+
+             #visualization purposes
+             ma2.markers[-2].color.r = 0.0
+             ma2.markers[-2].color.b = 1.0
+             ma2.markers[-2].ns = ".last_"+ma2.markers[-2].ns
+             ma2.markers[-1].color.r = 0.0
+             ma2.markers[-1].color.b = 1.0
+             ma2.markers[-1].ns = ".last_"+ma2.markers[-1].ns
+
+         self.landmarks_pub.publish(ma)
          self.last_landmarks_pub.publish(ma2)
 
-     def publish_markers(self,event):
-         if not self.vis_timer.is_alive():
-             self.vis_timer.shutdown()
+
+
+     def publish_map(self):
+         oa = ObjectArray()
+         for i in range(len(self.current_map)):
+             obj = self.current_map[i].get_object_msg()
+             oa.objects.append(copy.deepcopy(obj))
+         self.map_pub.publish(oa)
+
+
+     def publish_data(self,event):
+         if not self.pub_data_timer.is_alive():
+             self.pub_data_timer.shutdown()
          else:
              self.publish_regions()
              self.publish_waypoints()
-             self.publish_landmarks()
+             self.publish_landmarks_and_furniture()
+
+             #self.publish_map() #TODO: Finish
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 

@@ -1,26 +1,8 @@
+#--------------------------------------------------------#
+#--------------- MAPPING    -----------------------------#
+#--------------------------------------------------------#
 
-waypoints:
-      - name : door_livingroom_to_bedroom
-        pose: [4.17,-6.12]
-        room: living_room
-      - name : door_bedroom_to_livingroom
-        pose: [3.31,-6.04]
-        room: bedroom
-      - name : door_kitchen_to_bathroom
-        pose: [4.77,-2.56]
-        room : kitchen
-      - name : door_bathroom_to_kitchen
-        pose: [3.97,-2.39]
-        room : bathroom
-      - name : door_bedroom_to_bathroom
-        pose: [3.14,-4.81]
-        room : bedroom
-      - name : door_bathroom_to_bedroom
-        pose: [3.32, -3.96]
-        room : bathroom
-
-
-
+#--------------- ROOMS -------------------------------#
 rooms:
     - name : kitchen
       pose1: [5.06,-0.37] #top_left
@@ -55,6 +37,7 @@ rooms:
 
 
 
+#--------------- LINKS (DOORS)-----------------------#
 connection:
     - name: con1
       rooms: ["kitchen","living_room"]
@@ -77,3 +60,58 @@ connection:
     - name: con7
       rooms: ["corridor","kitchen"]
       door: true
+
+
+
+objects:
+    - name: bottle
+      seen: false
+      pose: [0.0,0.0,0.0]
+      room: ''
+      furniture: ''
+      expected_rooms: ["kitchen","living_room"]
+      expected_furniture: ["kitchen_table","tv_table"]
+
+
+furniture:
+    - name: kitchen_table
+      static: true
+      seen: false
+      room: kitchen
+      pose: [6.4,-2.4]
+      orientation: 1.3
+      size: [1,0.6,1.0]
+    - name: tv_table
+      static: true
+      seen: false
+      room: living_room
+      pose: [5.3,-8.3]
+      orientation: -0.2
+      size: [0.6,0.6,0.4]
+
+
+
+
+#--------------------------------------------------------#
+#--------------- NAVIGATION -----------------------------#
+#--------------------------------------------------------#
+waypoints:
+      - name : door_livingroom_to_bedroom
+        pose: [4.17,-6.12]
+        room: living_room
+      - name : door_bedroom_to_livingroom
+        pose: [3.31,-6.04]
+        room: bedroom
+      - name : door_kitchen_to_bathroom
+        pose: [4.77,-2.56]
+        room : kitchen
+      - name : door_bathroom_to_kitchen
+        pose: [3.97,-2.39]
+        room : bathroom
+      - name : door_bedroom_to_bathroom
+        pose: [3.14,-4.81]
+        room : bedroom
+      - name : door_bathroom_to_bedroom
+        pose: [3.32, -3.96]
+        room : bathroom
+
