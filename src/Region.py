@@ -2,6 +2,7 @@
 
 #Author: Roger Pi Roig
 
+import rospy
 import numpy as np
 import math
 import copy
