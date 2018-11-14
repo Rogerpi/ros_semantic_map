@@ -22,6 +22,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 # Services
 from std_srvs.srv import Empty, EmptyResponse
 from robot_map.srv import SemanticGoal, SemanticGoalResponse
+from robot_map.srv import SemanticChange, SemanticChangeResponse
 
 # Others
 from tf import TransformListener
@@ -80,8 +81,17 @@ class Landmark:
         self.seen = True
 
     def set_mapped(self):
-        set.mapped = True
-        set.seen = False
+        self.mapped = True
+        self.seen = False
+
+        self.mapped_pose = self.pose
+        self.mapped_room = self.room
+        self.furniture = furniture
+
+        #Reset current
+        self.pose = []
+        self.room = ''
+        self.furniture = ''
 
     def set_place(self,furniture):
         self.furniture = furniture
@@ -147,8 +157,8 @@ class Landmark:
             response.moved = 2
         elif not self.mapped and self.seen: #
             response.current_position = self.pose
-            response.room = self.room
-            response.furniture = self.furniture
+            response.current_room = self.room
+            response.current_furniture = self.furniture
             response.moved = 2
         elif self.mapped and self.seen: #Check if moved
             response.mapped_position = self.mapped_pose
@@ -156,10 +166,10 @@ class Landmark:
             response.mapped_furniture = self.mapped_furniture
 
             response.current_position = self.pose
-            response.room = self.room
-            response.furniture = self.furniture
+            response.current_room = self.room
+            response.current_furniture = self.furniture
 
-            if response.current_furniture != response.previous_furniture or response.current_room != response.previous_room:
+            if response.current_furniture != response.mapped_furniture or response.current_room != response.mapped_room:
                 response.moved = 1
             else:
                 response.moved = 0

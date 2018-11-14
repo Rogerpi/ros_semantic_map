@@ -96,7 +96,7 @@ class Semantic_Map:
          else:
              print("Landmark "+detection.id+" seen again")
              print("Seting new position (Current Approach)")
-             selected.set_position([detection.pose.position.x,detection.pose.position.y,detection.pose.position.z],mapped=False,seen=True)
+             selected.set_position([detection.pose.position.x,detection.pose.position.y,detection.pose.position.z])
 
 
      def save_map(self,call):
@@ -119,7 +119,7 @@ class Semantic_Map:
      def check_object_status(self,call):
 
 
-         landmark =  next((x for x in self.map if x.id == call.object_id), None)
+         landmark =  next((x for x in self.current_map if x.id == call.object_id), None)
 
 
          #MOVED: 0 No, 1 Yes, 2 Unknown
