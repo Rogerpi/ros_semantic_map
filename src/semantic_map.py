@@ -42,7 +42,7 @@ class Semantic_Map:
      def __init__(self):
 
          self.current_map = [] #Landmark
-         self.last_map = [] # Landmark
+
 
          self.current_furniture = [] # Furniture
          self.last_furniture = [] #Furniture
@@ -91,21 +91,19 @@ class Semantic_Map:
          selected = next((x for x in self.current_map if x.id == detection.id), None)
          if selected == None: #NEW LANDMARK
              print("New Landmark "+detection.id+" Added!")
-             landmark = Landmark(detection.id,[detection.pose.position.x,detection.pose.position.y,detection.pose.position.z],seen=True)
+             landmark = Landmark(detection.id,[detection.pose.position.x,detection.pose.position.y,detection.pose.position.z],mapped=False,seen=True)
              self.current_map.append(copy.deepcopy(landmark))
          else:
              print("Landmark "+detection.id+" seen again")
              print("Seting new position (Current Approach)")
-             selected.set_position([detection.pose.position.x,detection.pose.position.y,detection.pose.position.z],seen=True)
+             selected.set_position([detection.pose.position.x,detection.pose.position.y,detection.pose.position.z],mapped=False,seen=True)
 
 
      def save_map(self,call):
          print("Save Map...")
-         print("Overwritting last map...")
-         del self.last_map[:]
-         self.last_map = copy.deepcopy(self.current_map)
-         print("Deleting current map...")
-         del self.current_map[:]
+
+         for i in range(len(self.current_map)):
+             self.current_map[i].set_mapped()
          print("Done!")
 
          return EmptyResponse()
@@ -120,13 +118,18 @@ class Semantic_Map:
 
      def check_object_status(self,call):
 
-         response = SemanticChangeResponse()
-         landmark_prev = next((x for x in self.last_map if x.id == call.object_id), None)
+
          landmark =  next((x for x in self.map if x.id == call.object_id), None)
 
+
          #MOVED: 0 No, 1 Yes, 2 Unknown
-         if landmark_prev == None and landmark == None: # The landmark doesn't exist
+         if  landmark == None: # The landmark doesn't exist
+             response = SemanticChangeResponse()
              response.mapped = False
+             return response
+         else:
+             return landmark.get_status_response()
+         '''
          elif landmark_prev != None and landmark == None: # Exists but only mapped once
              response.mapped = True
              response.moved = 2
@@ -157,6 +160,7 @@ class Semantic_Map:
              print("[BUG] SMILE (surprise) :)") # wanna play a game?
 
          return response
+         '''
 
 
 
@@ -261,6 +265,7 @@ class Semantic_Map:
          landmarks = rospy.get_param(name)
          for i in range(len(landmarks)):
              id = landmarks[i].get("name")
+             mapped = landmarks[i].get("mapped")
              seen = landmarks[i].get("seen")
              pose = landmarks[i].get("pose")
              room = landmarks[i].get("room")
@@ -268,11 +273,11 @@ class Semantic_Map:
              exp_furniture = landmarks[i].get("expected_furniture")
              exp_rooms = landmarks[i].get("expected_rooms")
 
-             landmark = Landmark(id,pose,room,seen,furniture)
+             landmark = Landmark(id,pose,room,mapped,seen,furniture)
              landmark.set_expected_rooms(exp_rooms)
              landmark.set_expected_furniture(exp_furniture)
 
-             self.last_map.append(copy.deepcopy(landmark))
+             self.current_map.append(copy.deepcopy(landmark))
 
 
      def get_furniture(self,name):
@@ -318,24 +323,15 @@ class Semantic_Map:
          #current map
          ma = MarkerArray()
          for i in range(len(self.current_map)):
-             bbox, text = self.current_map[i].get_marker()
-             ma.markers.append(copy.deepcopy(bbox))
-             ma.markers.append(copy.deepcopy(text))
+             bbox, text = self.current_map[i].get_map_marker()
+             if bbox != None:
+                 ma.markers.append(copy.deepcopy(bbox))
+                 ma.markers.append(copy.deepcopy(text))
+             bbox, text = self.current_map[i].get_seen_marker()
+             if bbox != None:
+                 ma.markers.append(copy.deepcopy(bbox))
+                 ma.markers.append(copy.deepcopy(text))
 
-         #previous map
-         ma2 = MarkerArray()
-         for i in range(len(self.last_map)):
-             bbox, text = self.last_map[i].get_marker()
-             ma2.markers.append(copy.deepcopy(bbox))
-             ma2.markers.append(copy.deepcopy(text))
-
-             #visualization purposes
-             ma2.markers[-2].color.r = 0.0
-             ma2.markers[-2].color.b = 1.0
-             ma2.markers[-2].ns = ".last_"+ma2.markers[-2].ns
-             ma2.markers[-1].color.r = 0.0
-             ma2.markers[-1].color.b = 1.0
-             ma2.markers[-1].ns = ".last_"+ma2.markers[-1].ns
 
 
          #current map furniture
@@ -345,6 +341,7 @@ class Semantic_Map:
              ma.markers.append(copy.deepcopy(text))
 
          #previous map furniture
+         ma2 = MarkerArray()
          for i in range(len(self.last_furniture)):
              bbox, text = self.last_furniture[i].get_marker()
              ma2.markers.append(copy.deepcopy(bbox))

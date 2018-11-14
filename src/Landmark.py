@@ -79,6 +79,10 @@ class Landmark:
         self.pose = pose
         self.seen = True
 
+    def set_mapped(self):
+        set.mapped = True
+        set.seen = False
+
     def set_place(self,furniture):
         self.furniture = furniture
 
@@ -130,8 +134,43 @@ class Landmark:
             return client.get_result()
 
 
+    def get_status_response(self):
+        response = SemanticChangeResponse()
+
+        response.mapped = self.mapped
+        response.detected = self.seen
+
+        if self.mapped and not self.seen: #
+            response.mapped_position = self.mapped_pose
+            response.mapped_room = self.mapped_room
+            response.mapped_furniture = self.mapped_furniture
+            response.moved = 2
+        elif not self.mapped and self.seen: #
+            response.current_position = self.pose
+            response.room = self.room
+            response.furniture = self.furniture
+            response.moved = 2
+        elif self.mapped and self.seen: #Check if moved
+            response.mapped_position = self.mapped_pose
+            response.mapped_room = self.mapped_room
+            response.mapped_furniture = self.mapped_furniture
+
+            response.current_position = self.pose
+            response.room = self.room
+            response.furniture = self.furniture
+
+            if response.current_furniture != response.previous_furniture or response.current_room != response.previous_room:
+                response.moved = 1
+            else:
+                response.moved = 0
+        elif: #Just for saving expected values, never mapped, never seen
+            response.moved = 2
+
+        return response
 
     def get_seen_marker(self,r=1.0,g=0.0,b=0.0,a=1.0):
+        if not self.seen:
+            return None, None
         #Sphere as position
         marker = Marker()
         marker.header.frame_id = self.frame_id
@@ -181,6 +220,8 @@ class Landmark:
         return marker, text
 
     def get_map_marker(self,r=0.0,g=0.0,b=1.0,a=1.0):
+        if not self.mapped:
+            return None,None
         #Sphere as position
         marker = Marker()
         marker.header.frame_id = self.frame_id
@@ -200,7 +241,7 @@ class Landmark:
         marker.pose.position.y = self.mapped_pose[1]
         marker.pose.position.z = self.mapped_pose[2]
         marker.ns = self.id
-        marker.id = 0
+        marker.id = 2
 
         #Show text above
         text = Marker()
@@ -221,7 +262,7 @@ class Landmark:
         text.ns = self.id+"_name"
         text.text = "MAP "+self.id
 
-        text.id = 1
+        text.id = 3
 
         #So the markers gets deleted from RVIZ if they are not published
         marker.lifetime.secs = 2

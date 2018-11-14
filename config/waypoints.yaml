@@ -66,6 +66,7 @@ connection:
 objects:
     - name: bottle
       seen: false
+      mapped: true
       pose: [0.0,0.0,0.0]
       room: ''
       furniture: ''
