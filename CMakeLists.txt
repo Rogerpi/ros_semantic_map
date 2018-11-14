@@ -51,6 +51,8 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(
    FILES
    Detection.msg
+   Object.msg
+   ObjectArray.msg
 #   Message2.msg
  )
 
@@ -58,6 +60,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_service_files(
    FILES
    SemanticGoal.srv
+   SemanticChange.srv
 #   Service2.srv
  )
 
