@@ -43,7 +43,6 @@ class Semantic_Map:
 
          self.current_map = [] #Landmark
 
-
          self.current_furniture = [] # Furniture
          self.last_furniture = [] #Furniture
 
@@ -57,15 +56,16 @@ class Semantic_Map:
          self.landmarks_pub = rospy.Publisher('/semantic_map/landmarks', MarkerArray , queue_size=10)
          self.last_landmarks_pub = rospy.Publisher('/semantic_map/previous_landmarks', MarkerArray , queue_size=10)
 
-         #Subscribers
+         ##Subscribers
          self.landmark_detection_sub = rospy.Subscriber('/semantic_map/landmark_detection',Detection,self.add_landmark)
 
-         #Actions
+         ##Actions
          self.goal_client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
          self.goal_client.wait_for_server()
          print("Move Base Goal Action Server Initialized")
 
-         #Services
+         ##Services
+         #Load from YAML
          self.load_from_param_srv = rospy.Service('/semantic_map/load_from_param', Empty, self.load_from_param)
 
          #Mapping
@@ -101,11 +101,9 @@ class Semantic_Map:
 
      def save_map(self,call):
          print("Save Map...")
-
          for i in range(len(self.current_map)):
              self.current_map[i].set_mapped()
          print("Done!")
-
          return EmptyResponse()
 
 
@@ -118,14 +116,12 @@ class Semantic_Map:
 
      def check_object_status(self,call):
 
-
          landmark =  next((x for x in self.current_map if x.id == call.object_id), None)
-
-
          #MOVED: 0 No, 1 Yes, 2 Unknown
          if  landmark == None: # The landmark doesn't exist
              response = SemanticChangeResponse()
              response.mapped = False
+             response.detected = False
              return response
          else:
              return landmark.get_status_response()

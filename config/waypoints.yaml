@@ -70,7 +70,7 @@ objects:
       pose: [0.0,0.0,0.0]
       room: ''
       furniture: ''
-      expected_rooms: ["kitchen","living_room"]
+      expected_rooms: ["kitchen","living_room"] # Ordered to most likely to less likely
       expected_furniture: ["kitchen_table","tv_table"]
 
 
