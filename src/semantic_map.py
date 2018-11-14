@@ -129,39 +129,6 @@ class Semantic_Map:
              return response
          else:
              return landmark.get_status_response()
-         '''
-         elif landmark_prev != None and landmark == None: # Exists but only mapped once
-             response.mapped = True
-             response.moved = 2
-             response.current_position = landmark_prev.get_position()
-             response.current_furniture = landmark_prev.get_furniture()
-             response.current_room = landmark_prev.get_room()
-         elif landmark_prev == None and landmark != None: # Exists but only mapped once
-             response.mapped = True
-             response.moved = 2
-             response.current_position = landmark.get_position()
-             response.current_furniture = landmark.get_furniture()
-             response.current_room = landmark.get_room()
-         elif landmark_prev != None and landmark != None: # Mapped twice, check...
-             #TODO Check position distances
-             response.mapped = True
-             response.moved = 0
-             response.current_position = landmark.get_position()
-             response.current_furniture = landmark.get_furniture()
-             response.current_room = landmark.get_room()
-             response.previous_position = landmark_prev.get_position()
-             response.previous_furniture = landmark_prev.get_furniture()
-             response.previous_room = landmark_prev.get_room()
-
-             if response.current_furniture != response.previous_furniture or response.current_room != response.previous_room:
-                 response.moved = 1
-
-         else:
-             print("[BUG] SMILE (surprise) :)") # wanna play a game?
-
-         return response
-         '''
-
 
 
 
