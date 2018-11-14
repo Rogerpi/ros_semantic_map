@@ -1,0 +1,10 @@
+string object_id
+---
+bool mapped
+uint8 moved # 0 No, 1 Yes, 2 Unknown
+float64[] previous_position
+string previous_furniture
+string previous_room
+float64[] current_position
+string current_furniture
+string current_room
