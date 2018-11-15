@@ -11,6 +11,7 @@ import copy
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import PoseStamped, Pose, Point
 from tf2_msgs.msg import TFMessage
+from tf import TransformListener
 
 from robot_map.msg import Detection
 from robot_map.msg import Object, ObjectArray
@@ -48,6 +49,8 @@ class Semantic_Map:
 
          self.regions = [] # Regions
          self.waypoints = [] # Waypoints
+
+         self.tf_listener = TransformListener()
 
 
          #Publishers
@@ -87,7 +90,23 @@ class Semantic_Map:
 
 #--------- ADD TO MAP --------------------------#
 
-     def add_landmark(self,detection):
+     def add_landmark(self,detection_msg):
+
+         if detection_msg.header.frame_id != "map" and detection_msg.header.frame_id != "/map" :
+             print("Transform detection to map frame")
+             p = Pose()
+             p = copy.deepcopy(detection_msg.pose)
+             pose_msg = PoseStamped()
+             pose_msg.pose = p
+             pose_msg.header.frame_id = detection_msg.header.frame_id
+
+             object_world = self.tf_listener.transformPose("/map",pose_msg)
+
+             detection = copy.deepcopy(detection_msg)
+             detection.pose = object_world.pose
+         else:
+             detection = detection_msg
+
          selected = next((x for x in self.current_map if x.id == detection.id), None)
          if selected == None: #NEW LANDMARK
              print("New Landmark "+detection.id+" Added!")
