@@ -38,28 +38,49 @@ rooms:
 
 
 #--------------- LINKS (DOORS)-----------------------#
-connection:
+connections: #open 0 (False), 1 (True), 2 (Unknown)
     - name: con1
       rooms: ["kitchen","living_room"]
+      corner1: [0.0,0.0]
+      corner2: [0.0,0.0]
       door: false
+      open: 1
     - name: con2
       rooms: ["kitchen","bathroom"]
+      corner1: [4.5,-2.3]
+      corner2: [4.4,-2.8]
       door: true
+      open: 1
     - name: con3
       rooms: ["living_room","bedroom"]
+      corner1: [3.86,-5.69]
+      corner2: [3.67,-6.6]
       door: true
+      open: 1
     - name: con4
       rooms: ["bedroom","bathroom"]
+      corner1: [2.24,-4.25]
+      corner2: [3.6,-4.48]
       door: true
+      open: 0
     - name: con5
       rooms: ["Unknown","entrance"]
-      door: true
+      corner1: [0.0,0.0]
+      corner2: [1.0,0.0]
+      door: false
+      open: 0
     - name: con6
       rooms: ["entrance","corridor"]
-      door: true
+      corner1: [0.0,0.0]
+      corner2: [1.0,0.0]
+      door: false
+      open: 0
     - name: con7
       rooms: ["corridor","kitchen"]
-      door: true
+      corner1: [5.0,3.0]
+      corner2: [3.0,3.0]
+      door: false
+      open: 0
 
 
 

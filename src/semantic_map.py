@@ -32,6 +32,7 @@ from Landmark import Landmark
 from Region import Region
 from Waypoint import Waypoint
 from Furniture import Furniture
+from Connection import Connection
 
 #from Path import Path
 #from Furniture import Furniture
@@ -50,6 +51,8 @@ class Semantic_Map:
          self.regions = [] # Regions
          self.waypoints = [] # Waypoints
 
+         self.connections = [] # Doors
+
          self.tf_listener = TransformListener()
 
 
@@ -58,6 +61,7 @@ class Semantic_Map:
          self.waypoints_pub = rospy.Publisher('/semantic_map/waypoints', MarkerArray , queue_size=10)
          self.landmarks_pub = rospy.Publisher('/semantic_map/landmarks', MarkerArray , queue_size=10)
          self.last_landmarks_pub = rospy.Publisher('/semantic_map/previous_landmarks', MarkerArray , queue_size=10)
+         self.connections_pub = rospy.Publisher('/semantic_map/connections', MarkerArray , queue_size=10)
 
          ##Subscribers
          self.landmark_detection_sub = rospy.Subscriber('/semantic_map/landmark_detection',Detection,self.add_landmark)
@@ -189,6 +193,7 @@ class Semantic_Map:
          self.get_regions("/rooms")
          self.get_landmarks("/objects")
          self.get_furniture("/furniture")
+         self.get_connections("/connections")
          return EmptyResponse()
 
 
@@ -279,8 +284,17 @@ class Semantic_Map:
              self.last_furniture.append(copy.deepcopy(object))
 
 
-     def get_doors(self,name): # Or links?
-         pass #TODO?
+     def get_connections(self,name):
+         connections = rospy.get_param(name)
+         for i in range(len(connections)):
+             c1 = connections[i].get("corner1")
+             c2 = connections[i].get("corner2")
+             door = connections[i].get("door")
+             open = connections[i].get("open")
+             rooms = connections[i].get("rooms")
+
+             con = Connection( connections[i].get("name"),rooms,c1,c2,door,open)
+             self.connections.append(copy.deepcopy(con))
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 #--------- Publish Markers for Visualization ---#
@@ -340,6 +354,14 @@ class Semantic_Map:
          self.landmarks_pub.publish(ma)
          self.last_landmarks_pub.publish(ma2)
 
+     def publish_connections(self):
+         ma = MarkerArray()
+         for i in range(len(self.connections)):
+             bbox, text = self.connections[i].get_marker()
+             if bbox != None:
+                 ma.markers.append(copy.deepcopy(bbox))
+                 ma.markers.append(copy.deepcopy(text))
+         self.connections_pub.publish(ma)
 
 
      def publish_map(self):
@@ -350,6 +372,7 @@ class Semantic_Map:
          self.map_pub.publish(oa)
 
 
+
      def publish_data(self,event):
          if not self.pub_data_timer.is_alive():
              self.pub_data_timer.shutdown()
@@ -357,6 +380,7 @@ class Semantic_Map:
              self.publish_regions()
              self.publish_waypoints()
              self.publish_landmarks_and_furniture()
+             self.publish_connections()
 
              #self.publish_map() #TODO: Finish
 
