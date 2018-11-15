@@ -137,3 +137,7 @@ waypoints:
         pose: [3.32, -3.96]
         room : bathroom
 
+
+paths:
+      - name: path1
+        waypoints: ["door_livingroom_to_bedroom","door_bedroom_to_livingroom","door_kitchen_to_bathroom"]

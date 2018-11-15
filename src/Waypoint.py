@@ -37,6 +37,12 @@ class Waypoint:
         self.y = y
         self.room = room
 
+    def get_point(self):
+        p = Point()
+        p.x = self.x
+        p.y = self.y
+        return p
+
 
 
     def send_goal(self,client):

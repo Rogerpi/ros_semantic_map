@@ -33,6 +33,7 @@ from Region import Region
 from Waypoint import Waypoint
 from Furniture import Furniture
 from Connection import Connection
+from Path import Path
 
 #from Path import Path
 #from Furniture import Furniture
@@ -53,6 +54,8 @@ class Semantic_Map:
 
          self.connections = [] # Doors
 
+         self.paths = [] # Paths
+
          self.tf_listener = TransformListener()
 
 
@@ -62,7 +65,7 @@ class Semantic_Map:
          self.landmarks_pub = rospy.Publisher('/semantic_map/landmarks', MarkerArray , queue_size=10)
          self.last_landmarks_pub = rospy.Publisher('/semantic_map/previous_landmarks', MarkerArray , queue_size=10)
          self.connections_pub = rospy.Publisher('/semantic_map/connections', MarkerArray , queue_size=10)
-
+         self.paths_pub = rospy.Publisher('/semantic_map/paths',MarkerArray,queue_size = 10)
          ##Subscribers
          self.landmark_detection_sub = rospy.Subscriber('/semantic_map/landmark_detection',Detection,self.add_landmark)
 
@@ -82,6 +85,7 @@ class Semantic_Map:
          self.goal_to_waypoint_srv = rospy.Service('/semantic_map/goal_to_waypoint', SemanticGoal, self.go_to_waypoint)
          self.goal_to_landmark_srv = rospy.Service('/semantic_map/goal_to_landmark', SemanticGoal, self.go_to_landmark)
          self.goal_to_region_srv   = rospy.Service('/semantic_map/goal_to_region'  , SemanticGoal, self.go_to_region)
+         self.follow_path_srv      = rospy.Service('/semantic_map/follow_path'  , SemanticGoal, self.follow_path)
 
          #Knowledge
          self.check_object_status_srv   = rospy.Service('/semantic_map/check_object_status'  , SemanticChange, self.check_object_status)
@@ -183,7 +187,14 @@ class Semantic_Map:
          return response
 
      def follow_path(self,call):
-         pass # TODO
+         selected = next((x for x in self.paths if x.id == call.goal_name), None)
+         response = SemanticGoalResponse()
+         if selected == None:
+             response.success = False
+         else:
+             selected.execute(self.goal_client)
+             response.success = True
+         return response
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 #--------- Load from param server --------------#
@@ -194,6 +205,7 @@ class Semantic_Map:
          self.get_landmarks("/objects")
          self.get_furniture("/furniture")
          self.get_connections("/connections")
+         self.get_paths("/paths")
          return EmptyResponse()
 
 
@@ -295,6 +307,20 @@ class Semantic_Map:
 
              con = Connection( connections[i].get("name"),rooms,c1,c2,door,open)
              self.connections.append(copy.deepcopy(con))
+
+     def get_paths(self,name):
+         paths = rospy.get_param(name)
+         for path_item in paths:
+             path = Path(path_item.get("name"))
+             waypoints_list = path_item.get("waypoints")
+             for waypoint_name in waypoints_list:
+                 waypoint = next((wp for wp in self.waypoints if wp.id == waypoint_name), None)
+                 if waypoint == None:
+                     print("WARN: Non-exist waypoint in Path... Skip")
+                 else:
+                     path.append(waypoint)
+             self.paths.append(copy.copy(path))
+
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 #--------- Publish Markers for Visualization ---#
@@ -314,6 +340,15 @@ class Semantic_Map:
              ma.markers.append(copy.deepcopy(bbox))
              ma.markers.append(copy.deepcopy(text))
          self.waypoints_pub.publish(ma)
+
+
+     def publish_paths(self):
+         ma = MarkerArray()
+         for i in range(len(self.paths)):
+             bbox, text = self.paths[i].get_marker()
+             ma.markers.append(copy.deepcopy(bbox))
+             ma.markers.append(copy.deepcopy(text))
+         self.paths_pub.publish(ma)
 
      def publish_landmarks_and_furniture(self):
          #current map
@@ -381,6 +416,7 @@ class Semantic_Map:
              self.publish_waypoints()
              self.publish_landmarks_and_furniture()
              self.publish_connections()
+             self.publish_paths()
 
              #self.publish_map() #TODO: Finish
 
