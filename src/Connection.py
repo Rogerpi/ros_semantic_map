@@ -69,7 +69,7 @@ class Connection:
 
         marker.pose.position.x = (self.corner1[0] + self.corner2[0])/2
         marker.pose.position.y = (self.corner1[1] + self.corner2[1])/2
-        marker.pose.position.z = marker.scale.z /2
+        marker.pose.position.z = 0.5
 
         marker.color.a = 0.4
         if self.open:
