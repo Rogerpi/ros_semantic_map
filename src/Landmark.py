@@ -81,17 +81,18 @@ class Landmark:
         self.seen = True
 
     def set_mapped(self):
-        self.mapped = True
-        self.seen = False
+        if self.seen:
+            self.mapped = True
+            self.seen = False
 
-        self.mapped_pose = self.pose
-        self.mapped_room = self.room
-        self.furniture = furniture
+            self.mapped_pose = self.pose
+            self.mapped_room = self.room
+            self.mapped_furniture = self.furniture
 
-        #Reset current
-        self.pose = []
-        self.room = ''
-        self.furniture = ''
+            #Reset current
+            self.pose = []
+            self.room = ''
+            self.furniture = ''
 
     def set_place(self,furniture):
         self.furniture = furniture
