@@ -35,19 +35,33 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 # Furniture
 # -----------------------------------------------------------------------------------#
 class Furniture:
-    def __init__(self,id,pose,yaw,size,room = "",seen=False,static=False):
+    def __init__(self,id,pose,yaw,size,room = "",mapped = False, seen=False,static=False):
         self.id = id
-
-        #If detected
-        self.pose = [0.0,0.0,0.0]
-        self.pose[0:2] = pose[0:2] #Z Assumtion, all furniture stands on the floor, z is ommited
-
-        self.orientation = quaternion_from_euler(0.0, 0.0, yaw)
-        self.static = static
-
-        self.room = room # string or object?
-
         self.seen = seen
+        self.mapped = mapped
+        self.static = static
+        self.mapped_orientation = []
+        self.mapped_pose = []
+        self.mapped_room = ''
+        self.pose = []
+        self.orientation = []
+        self.room = ''
+        #If detected
+        if self.seen:
+            self.pose = [0.0,0.0,0.0]
+            self.pose[0:2] = pose[0:2] #Z Assumtion, all furniture stands on the floor, z is ommited
+
+            self.orientation = quaternion_from_euler(0.0, 0.0, yaw)
+            self.room = room # string or object?
+        if self.mapped:
+            self.mapped_pose = [0.0,0.0,0.0]
+            self.mapped_pose[0:2] = pose[0:2] #Z Assumtion, all furniture stands on the floor, z is ommited
+
+            self.mapped_orientation = quaternion_from_euler(0.0, 0.0, yaw)
+            self.mapped_room = room # string or object?
+
+
+
 
         #GUESS
 
@@ -75,6 +89,23 @@ class Furniture:
 
     def set_size(self,size):
         self.size = size
+
+
+
+    def set_mapped(self):
+        if self.seen:
+            self.mapped = True
+            self.seen = False
+
+            self.mapped_pose = self.pose
+            self.mapped_room = self.room
+            self.mapped_orientatin = self.orientation
+
+            #Reset current
+            self.pose = []
+            #self.orientation = [] For now, lets keep it...
+            self.room = ''
+            self.furniture = ''
 
     #---------------- GET Information ----------------#
 
@@ -112,8 +143,44 @@ class Furniture:
             print("Goal finished")
             return client.get_result()
 
-    def get_marker(self):
 
+    def get_status_response(self):
+        response = SemanticChangeResponse()
+
+        response.mapped = self.mapped
+        response.detected = self.seen
+
+        if self.mapped and not self.seen: #
+            response.mapped_position = self.mapped_pose
+            response.mapped_room = self.mapped_room
+            #response.mapped_furniture = self.mapped_furniture
+            response.moved = 2
+        elif not self.mapped and self.seen: #
+            response.current_position = self.pose
+            response.current_room = self.room
+            #response.current_furniture = self.furniture
+            response.moved = 2
+        elif self.mapped and self.seen: #Check if moved
+            response.mapped_position = self.mapped_pose
+            response.mapped_room = self.mapped_room
+            #response.mapped_furniture = self.mapped_furniture
+
+            response.current_position = self.pose
+            response.current_room = self.room
+            #response.current_furniture = self.furniture
+
+            if  response.current_room != response.mapped_room:
+                response.moved = 1
+            else:
+                response.moved = 0
+        else: #Just for saving expected values, never mapped, never seen
+            response.moved = 2
+
+        return response
+
+    def get_seen_marker(self,r=1.0,g=0.0,b=0.0,a=1.0):
+        if not self.seen:
+            return None, None
         #Sphere as position
         marker = Marker()
         marker.header.frame_id = self.frame_id
@@ -123,18 +190,15 @@ class Furniture:
         marker.scale.y = self.size[1]
         marker.scale.z = self.size[2]
 
-        marker.color.a = 1.0
-        marker.color.r = 1.0
-        marker.color.g = 0.0
-        marker.color.b = 1.0
+        marker.color.a = a
+        marker.color.r = r
+        marker.color.g = g
+        marker.color.b = b
 
-        if not self.seen:
-            marker.color.a = 0.5
-            marker.color.r = 0.8
 
         marker.pose.position.x = self.pose[0]
         marker.pose.position.y = self.pose[1]
-        marker.pose.position.z = self.size[2]/2 # from the floor (assumtion: furniture is always on the floor)
+        marker.pose.position.z = self.pose[2]
 
         marker.pose.orientation.x = self.orientation[0]
         marker.pose.orientation.y = self.orientation[1]
@@ -152,16 +216,17 @@ class Furniture:
 
         text.scale.z = 0.2
 
-        text.color.a = 1.0
-        text.color.r = 0.8
-        text.color.b = 0.8
+        text.color.a = a
+        text.color.r = r
+        text.color.g = g
+        text.color.b = b
+
         text.pose.position.x = self.pose[0]
         text.pose.position.y = self.pose[1]
         text.pose.position.z = self.pose[2] + 0.1
         text.ns = self.id+"_name"
-        text.text = self.id
-        if not self.seen:
-            text.text = text.text+" (NOT SEEN)"
+        text.text = "DETECTED "+self.id
+
         text.id = 1
 
         #So the markers gets deleted from RVIZ if they are not published
@@ -169,3 +234,62 @@ class Furniture:
         text.lifetime.secs = 2
 
         return marker, text
+
+    def get_map_marker(self,r=0.0,g=0.0,b=1.0,a=1.0):
+        if not self.mapped:
+            return None,None
+        #Sphere as position
+        marker = Marker()
+        marker.header.frame_id = self.frame_id
+        marker.type = marker.CUBE
+        marker.action = marker.ADD
+        marker.scale.x = self.size[0]
+        marker.scale.y = self.size[1]
+        marker.scale.z = self.size[2]
+
+        marker.color.a = a
+        marker.color.r = r
+        marker.color.g = g
+        marker.color.b = b
+
+
+        marker.pose.position.x = self.mapped_pose[0]
+        marker.pose.position.y = self.mapped_pose[1]
+        marker.pose.position.z = self.mapped_pose[2]
+
+        marker.pose.orientation.x = self.mapped_orientation[0]
+        marker.pose.orientation.y = self.mapped_orientation[1]
+        marker.pose.orientation.z = self.mapped_orientation[2]
+        marker.pose.orientation.w = self.mapped_orientation[3]
+
+        marker.ns = self.id
+        marker.id = 2
+
+        #Show text above
+        text = Marker()
+        text.header.frame_id = self.frame_id
+        text.type =Marker.TEXT_VIEW_FACING
+        text.action = Marker.ADD
+
+        text.scale.z = 0.2
+
+        text.color.a = a
+        text.color.r = r
+        text.color.g = g
+        text.color.b = b
+
+        text.pose.position.x = self.mapped_pose[0]
+        text.pose.position.y = self.mapped_pose[1]
+        text.pose.position.z = self.mapped_pose[2] + 0.1
+        text.ns = self.id+"_name"
+        text.text = "MAP "+self.id
+
+        text.id = 3
+
+        #So the markers gets deleted from RVIZ if they are not published
+        marker.lifetime.secs = 2
+        text.lifetime.secs = 2
+
+        return marker, text
+
+

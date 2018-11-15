@@ -98,6 +98,7 @@ objects:
 furniture:
     - name: kitchen_table
       static: true
+      mapped: true
       seen: false
       room: kitchen
       pose: [6.4,-2.4]
@@ -105,6 +106,7 @@ furniture:
       size: [1,0.6,1.0]
     - name: tv_table
       static: true
+      mapped: true
       seen: false
       room: living_room
       pose: [5.3,-8.3]

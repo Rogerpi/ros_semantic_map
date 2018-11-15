@@ -47,7 +47,7 @@ class Semantic_Map:
          self.current_map = [] #Landmark
 
          self.current_furniture = [] # Furniture
-         self.last_furniture = [] #Furniture
+
 
          self.regions = [] # Regions
          self.waypoints = [] # Waypoints
@@ -63,7 +63,7 @@ class Semantic_Map:
          self.regions_pub = rospy.Publisher('/semantic_map/regions', MarkerArray , queue_size=10)
          self.waypoints_pub = rospy.Publisher('/semantic_map/waypoints', MarkerArray , queue_size=10)
          self.landmarks_pub = rospy.Publisher('/semantic_map/landmarks', MarkerArray , queue_size=10)
-         self.last_landmarks_pub = rospy.Publisher('/semantic_map/previous_landmarks', MarkerArray , queue_size=10)
+         self.furniture_pub = rospy.Publisher('/semantic_map/furniture', MarkerArray , queue_size=10)
          self.connections_pub = rospy.Publisher('/semantic_map/connections', MarkerArray , queue_size=10)
          self.paths_pub = rospy.Publisher('/semantic_map/paths',MarkerArray,queue_size = 10)
          ##Subscribers
@@ -283,6 +283,7 @@ class Semantic_Map:
          furnitures = rospy.get_param(name)
          for i in range(len(furnitures)):
              id = furnitures[i].get("name")
+             mapped = furnitures[i].get("mapped")
              seen = furnitures[i].get("seen")
              static = furnitures[i].get("static")
              pose = furnitures[i].get("pose")
@@ -290,10 +291,10 @@ class Semantic_Map:
              room = furnitures[i].get("room")
              size = furnitures[i].get("size")
 
-             object = Furniture(id,pose,orientation,size,room,seen,static)
+             object = Furniture(id,pose,orientation,size,room,mapped,seen,static)
 
 
-             self.last_furniture.append(copy.deepcopy(object))
+             self.current_furniture.append(copy.deepcopy(object))
 
 
      def get_connections(self,name):
@@ -350,7 +351,7 @@ class Semantic_Map:
              ma.markers.append(copy.deepcopy(text))
          self.paths_pub.publish(ma)
 
-     def publish_landmarks_and_furniture(self):
+     def publish_landmarks(self):
          #current map
          ma = MarkerArray()
          for i in range(len(self.current_map)):
@@ -361,33 +362,22 @@ class Semantic_Map:
              bbox, text = self.current_map[i].get_seen_marker()
              if bbox != None:
                  ma.markers.append(copy.deepcopy(bbox))
-                 ma.markers.append(copy.deepcopy(text))
-
-
-
-         #current map furniture
-         for i in range(len(self.current_furniture)):
-             bbox, text = self.current_furniture[i].get_marker()
-             ma.markers.append(copy.deepcopy(bbox))
-             ma.markers.append(copy.deepcopy(text))
-
-         #previous map furniture
-         ma2 = MarkerArray()
-         for i in range(len(self.last_furniture)):
-             bbox, text = self.last_furniture[i].get_marker()
-             ma2.markers.append(copy.deepcopy(bbox))
-             ma2.markers.append(copy.deepcopy(text))
-
-             #visualization purposes
-             ma2.markers[-2].color.r = 0.0
-             ma2.markers[-2].color.b = 1.0
-             ma2.markers[-2].ns = ".last_"+ma2.markers[-2].ns
-             ma2.markers[-1].color.r = 0.0
-             ma2.markers[-1].color.b = 1.0
-             ma2.markers[-1].ns = ".last_"+ma2.markers[-1].ns
-
+                 ma.markers.append(copy.deepcopy(text))     
          self.landmarks_pub.publish(ma)
-         self.last_landmarks_pub.publish(ma2)
+
+     def publish_furniture(self):
+         #current map
+         ma = MarkerArray()
+         for i in range(len(self.current_furniture)):
+             bbox, text = self.current_furniture[i].get_map_marker()
+             if bbox != None:
+                 ma.markers.append(copy.deepcopy(bbox))
+                 ma.markers.append(copy.deepcopy(text))
+             bbox, text = self.current_furniture[i].get_seen_marker()
+             if bbox != None:
+                 ma.markers.append(copy.deepcopy(bbox))
+                 ma.markers.append(copy.deepcopy(text))
+         self.furniture_pub.publish(ma)
 
      def publish_connections(self):
          ma = MarkerArray()
@@ -414,7 +404,8 @@ class Semantic_Map:
          else:
              self.publish_regions()
              self.publish_waypoints()
-             self.publish_landmarks_and_furniture()
+             self.publish_landmarks()
+             self.publish_furniture()
              self.publish_connections()
              self.publish_paths()
 
