@@ -6,7 +6,7 @@ import rospy
 import numpy as np
 import math
 import copy
-
+import sys
 #Topics
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import PoseStamped, Pose, Point
@@ -42,8 +42,9 @@ from Path import Path
 # Semantic Map
 # -----------------------------------------------------------------------------------#
 class Semantic_Map:
-     def __init__(self):
+     def __init__(self,frame_id = "map"):
 
+         self.frame_id = frame_id #TODO initialize objects with the frame_id
          self.current_map = [] #Landmark
 
          self.current_furniture = [] # Furniture
@@ -102,7 +103,7 @@ class Semantic_Map:
 
      def add_landmark(self,detection_msg):
 
-         if detection_msg.header.frame_id != "map" and detection_msg.header.frame_id != "/map" :
+         if detection_msg.header.frame_id != self.frame_id:
              print("Transform detection to map frame")
              p = Pose()
              p = copy.deepcopy(detection_msg.pose)
@@ -110,7 +111,7 @@ class Semantic_Map:
              pose_msg.pose = p
              pose_msg.header.frame_id = detection_msg.header.frame_id
 
-             object_world = self.tf_listener.transformPose("/map",pose_msg)
+             object_world = self.tf_listener.transformPose(self.frame_id,pose_msg)
 
              detection = copy.deepcopy(detection_msg)
              detection.pose = object_world.pose
@@ -437,7 +438,7 @@ if __name__ == '__main__':
     # ROS initializzation
     rospy.init_node('semantic_map', anonymous=False)
 
-    node = Semantic_Map()
+    node = Semantic_Map(sys.argv[1])
     rospy.spin()
 
     #r = rospy.Rate(10)

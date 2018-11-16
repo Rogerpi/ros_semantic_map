@@ -34,7 +34,7 @@ from tf import TransformListener
 # Landmark represents an object
 # -----------------------------------------------------------------------------------#
 class Landmark:
-    def __init__(self,id,pose,room = "" , mapped=False, seen=False, furniture = "" ):
+    def __init__(self,id,pose,room = "" , mapped=False, seen=False, furniture = "", frame_id = "map_align"):
         self.id = id
 
         self.mapped = mapped
@@ -70,7 +70,7 @@ class Landmark:
         self.width = None #TODO #Assume is squared
         self.height = None #TODO
 
-        self.frame_id = "/map" #TODO configurable?
+        self.frame_id = frame_id #TODO configurable?
 
     #-------- ADD information to the landmark ----------#
     def set_room(self,room):

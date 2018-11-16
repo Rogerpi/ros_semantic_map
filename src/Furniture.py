@@ -35,7 +35,7 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 # Furniture
 # -----------------------------------------------------------------------------------#
 class Furniture:
-    def __init__(self,id,pose,yaw,size,room = "",mapped = False, seen=False,static=False):
+    def __init__(self,id,pose,yaw,size,room = "",mapped = False, seen=False,static=False, frame_id = "map_align"):
         self.id = id
         self.seen = seen
         self.mapped = mapped
@@ -72,7 +72,7 @@ class Furniture:
 
         self.size = size
 
-        self.frame_id = "/map" #TODO configurable?
+        self.frame_id = frame_id #TODO configurable?
 
     #-------- ADD information to the landmark ----------#
     def set_room(self,room):

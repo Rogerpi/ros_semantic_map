@@ -31,11 +31,12 @@ from tf import TransformListener
 # Points of interest
 # -----------------------------------------------------------------------------------#
 class Waypoint:
-    def __init__(self,id,x,y,room = "Undefined"):
+    def __init__(self,id,x,y,room = "Undefined",frame_id = "map_align"):
         self.id = id
         self.x = x
         self.y = y
         self.room = room
+        self.frame_id = frame_id
 
     def get_point(self):
         p = Point()
@@ -48,7 +49,7 @@ class Waypoint:
     def send_goal(self,client):
 
         goal = MoveBaseGoal()
-        goal.target_pose.header.frame_id = "map"
+        goal.target_pose.header.frame_id = self.frame_id
         goal.target_pose.header.stamp = rospy.Time.now()
         goal.target_pose.pose.position.x = self.x
         goal.target_pose.pose.position.y = self.y
@@ -69,7 +70,7 @@ class Waypoint:
     def get_marker(self):
         #Sphere as position
         marker = Marker()
-        marker.header.frame_id = "map"
+        marker.header.frame_id = self.frame_id
         marker.type = marker.SPHERE
         marker.action = marker.ADD
         marker.scale.x = 0.08
@@ -88,7 +89,7 @@ class Waypoint:
 
         #Show text above
         text = Marker()
-        text.header.frame_id = "map"
+        text.header.frame_id = self.frame_id
         text.type =Marker.TEXT_VIEW_FACING
         text.action = Marker.ADD
 

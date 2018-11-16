@@ -31,7 +31,7 @@ from tf import TransformListener
 # Regions (Rooms)
 # -----------------------------------------------------------------------------------#
 class Region:
-    def __init__(self,id,points,inside=None):
+    def __init__(self,id,points,inside=None,frame_id = "map_align"):
         self.id = id
         self.points = points
         self.inside = inside # Region
@@ -57,12 +57,13 @@ class Region:
             print("Goal finished")
             return client.get_result()
 
+        self.frame_id = frame_id
 
     def get_marker(self):
 
         #Sphere as position
         marker = Marker()
-        marker.header.frame_id = "map"
+        marker.header.frame_id = self.frame_id
         marker.type = marker.LINE_STRIP
         marker.action = marker.ADD
         marker.scale.x = 0.08
@@ -80,7 +81,7 @@ class Region:
 
         #Show text above
         text = Marker()
-        text.header.frame_id = "map"
+        text.header.frame_id = self.frame_id
         text.type =Marker.TEXT_VIEW_FACING
         text.action = Marker.ADD
 

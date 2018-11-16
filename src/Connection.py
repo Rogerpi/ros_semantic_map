@@ -29,13 +29,14 @@ from tf import TransformListener
 # Connection between rooms
 # -----------------------------------------------------------------------------------#
 class Connection:
-    def __init__(self,id,rooms,corner1,corner2,door = False,open = True):
+    def __init__(self,id,rooms,corner1,corner2,door = False,open = True, frame_id = "map_align"):
         self.id = id
         self.rooms = rooms
         self.door = door
         self.open = open
         self.corner1 = corner1
         self.corner2 = corner2
+        self.frame_id = frame_id
 
     def send_goal(self,client):
         #TODO
@@ -55,7 +56,7 @@ class Connection:
             return None,None
         #Sphere as position
         marker = Marker()
-        marker.header.frame_id = "map"
+        marker.header.frame_id = self.frame_id
         marker.type = marker.CYLINDER
         marker.action = marker.ADD
 
@@ -84,7 +85,7 @@ class Connection:
 
         #Show text above
         text = Marker()
-        text.header.frame_id = "map"
+        text.header.frame_id = self.frame_id
         text.type =Marker.TEXT_VIEW_FACING
         text.action = Marker.ADD
 
