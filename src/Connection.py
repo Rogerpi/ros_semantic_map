@@ -25,22 +25,40 @@ from robot_map.srv import SemanticGoal, SemanticGoalResponse
 # Others
 from tf import TransformListener
 
+from Waypoint import Waypoint
 # -----------------------------------------------------------------------------------#
 # Connection between rooms
 # -----------------------------------------------------------------------------------#
 class Connection:
-    def __init__(self,id,rooms,corner1,corner2,door = False,open = True, frame_id = "map_align"):
+    def __init__(self,id,rooms,waypoint1, waypoint2, open = True, frame_id = "map_align"):
         self.id = id
         self.rooms = rooms
-        self.door = door
         self.open = open
-        self.corner1 = corner1
-        self.corner2 = corner2
+        self.position = [(waypoint1[0] + waypoint2[0])/2,(waypoint1[1] + waypoint2[1])/2]
+        self.waypoint1_pose = waypoint1
+        self.waypoint2_pose = waypoint2
         self.frame_id = frame_id
+        self.waypoint1 = Waypoint(self.id+"_1",self.waypoint1_pose[0],self.waypoint1_pose[1],self.waypoint1_pose[2],self.rooms[0],self.frame_id)
+        self.waypoint2 = Waypoint(self.id+"_2",self.waypoint2_pose[0],self.waypoint2_pose[1],self.waypoint2_pose[2],self.rooms[1],self.frame_id)
+        self.waypoint1_b = Waypoint(self.id+"_1",self.waypoint1_pose[0],self.waypoint1_pose[1],self.waypoint1_pose[2]-3.14,self.rooms[0],self.frame_id)
+        self.waypoint2_b = Waypoint(self.id+"_2",self.waypoint2_pose[0],self.waypoint2_pose[1],self.waypoint2_pose[2]-3.14,self.rooms[1],self.frame_id)
+
 
     def send_goal(self,client):
         #TODO
         print("TODO")
+
+    def get_first_waypoint(self,forward = True):
+        if forward:
+            return self.waypoint1
+        else:
+            return self.waypoint2_b
+
+    def get_last_waypoint(self,forward = True):
+        if forward:
+            return self.waypoint2
+        else:
+            return self.waypoint1_b
 
     def set_status(self,open):
         self.open = open
@@ -52,24 +70,23 @@ class Connection:
 
 
     def get_marker(self):
-        if not self.door:
-            return None,None
+
         #Sphere as position
         marker = Marker()
         marker.header.frame_id = self.frame_id
         marker.type = marker.CYLINDER
         marker.action = marker.ADD
 
-        dx = (self.corner1[0]-self.corner2[0])
-        dy = (self.corner1[1]-self.corner2[1])
-        dist = math.sqrt(dx**2+dy**2)
+        #dx = (self.corner1[0]-self.corner2[0])
+        #dy = (self.corner1[1]-self.corner2[1])
+        #dist = math.sqrt(dx**2+dy**2)
 
-        marker.scale.x = dist
-        marker.scale.y = dist
+        marker.scale.x = 0.9#dist
+        marker.scale.y = 0.9#dist
         marker.scale.z = 1
 
-        marker.pose.position.x = (self.corner1[0] + self.corner2[0])/2
-        marker.pose.position.y = (self.corner1[1] + self.corner2[1])/2
+        marker.pose.position.x = self.position[0]
+        marker.pose.position.y = self.position[1]
         marker.pose.position.z = 0.5
 
         marker.color.a = 0.4
@@ -93,8 +110,8 @@ class Connection:
 
         text.color.a = 1.0
 
-        text.pose.position.x = (self.corner1[0] + self.corner2[0])/2
-        text.pose.position.y = (self.corner1[1] + self.corner2[1])/2
+        text.pose.position.x = self.position[0]
+        text.pose.position.y = self.position[1]
         text.pose.position.z = 0.2
         text.ns = self.id+"_name"
         text.text = self.id

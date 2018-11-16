@@ -24,19 +24,21 @@ from robot_map.srv import SemanticGoal, SemanticGoalResponse
 
 # Others
 from tf import TransformListener
-
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 
 # -----------------------------------------------------------------------------------#
 # Points of interest
 # -----------------------------------------------------------------------------------#
 class Waypoint:
-    def __init__(self,id,x,y,room = "Undefined",frame_id = "map_align"):
+    def __init__(self,id,x,y,yaw,room = "Undefined",frame_id = "map_align"):
         self.id = id
         self.x = x
         self.y = y
+        self.yaw = yaw
         self.room = room
         self.frame_id = frame_id
+        self.orientation = quaternion_from_euler(0.0, 0.0, self.yaw)
 
     def get_point(self):
         p = Point()
@@ -53,7 +55,10 @@ class Waypoint:
         goal.target_pose.header.stamp = rospy.Time.now()
         goal.target_pose.pose.position.x = self.x
         goal.target_pose.pose.position.y = self.y
-        goal.target_pose.pose.orientation.w = 1.0
+        goal.target_pose.pose.orientation.w = self.orientation[3]
+        goal.target_pose.pose.orientation.x = self.orientation[0]
+        goal.target_pose.pose.orientation.y = self.orientation[1]
+        goal.target_pose.pose.orientation.z = self.orientation[2]
 
         print("Goal to Waypoint "+str(self.id))
         client.send_goal(goal)

@@ -2,7 +2,7 @@
     <!--<arg name="marker1Id"         default="582"/>-->
 
 
-    <!--<node pkg="tf" type="static_transform_publisher" name="map_align" args="4 -4.5 0 -0.15 0 0 map map_align 100" />-->
+    <!--<node pkg="tf" type="static_transform_publisher" name="map_align" args="0 0 0 -0.15 0 0 map map_align 100" />-->
 
 
     <rosparam command="load" file="$(find robot_map)/config/semantic_map.yaml" />

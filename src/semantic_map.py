@@ -28,6 +28,7 @@ from robot_map.srv import SemanticChange, SemanticChangeResponse
 # Others
 from tf import TransformListener
 
+
 from Landmark import Landmark
 from Region import Region
 from Waypoint import Waypoint
@@ -93,9 +94,11 @@ class Semantic_Map:
 
          print("Service Server Initialized")
 
-         self.pub_data_timer = rospy.Timer(rospy.Duration(1), self.publish_data)
+
 
          self.load_from_param()
+
+         self.pub_data_timer = rospy.Timer(rospy.Duration(1), self.publish_data)
 
          print("Ready!")
 
@@ -229,7 +232,7 @@ class Semantic_Map:
          waypoints = rospy.get_param(name)
          for i in range(len(waypoints)):
              position = waypoints[i].get("pose")
-             waypoint = Waypoint( waypoints[i].get("name"),position[0],position[1])
+             waypoint = Waypoint( waypoints[i].get("name"),position[0],position[1],0.0)
              self.waypoints.append(copy.deepcopy(waypoint))
 
 
@@ -316,26 +319,37 @@ class Semantic_Map:
      def get_connections(self,name):
          connections = rospy.get_param(name)
          for i in range(len(connections)):
-             c1 = connections[i].get("corner1")
-             c2 = connections[i].get("corner2")
-             door = connections[i].get("door")
+             waypoint1 = connections[i].get("waypoint1")
+             waypoint2 = connections[i].get("waypoint2")
+             #door = connections[i].get("door")
              open = connections[i].get("open")
              rooms = connections[i].get("rooms")
-
-             con = Connection( connections[i].get("name"),rooms,c1,c2,door,open)
+             #position = connections[i].get("position")
+             con = Connection( connections[i].get("name"),rooms,waypoint1,waypoint2,open)
              self.connections.append(copy.deepcopy(con))
+         print("connections_set")
 
      def get_paths(self,name):
          paths = rospy.get_param(name)
          for path_item in paths:
              path = Path(path_item.get("name"))
-             waypoints_list = path_item.get("waypoints")
-             for waypoint_name in waypoints_list:
-                 waypoint = next((wp for wp in self.waypoints if wp.id == waypoint_name), None)
-                 if waypoint == None:
-                     print("WARN: Non-exist waypoint in Path... Skip")
-                 else:
-                     path.append(waypoint)
+             wp_list = path_item.get("poses")
+             for wp in wp_list:
+
+                is_door = wp.get("type") == 0
+                name = wp.get("name")
+                if is_door:
+                    move_forward = wp.get("forward")
+                    door = next((d for d in self.connections if d.id == name ), None)
+                    waypoint1 = door.get_first_waypoint(move_forward)
+                    waypoint2 = door.get_last_waypoint(move_forward)
+                    path.append(waypoint1)
+                    path.append(waypoint2)
+
+                else:
+                    wayp = next((w for w in self.waypoints if w.id == name ), None)
+                    path.append(wayp)
+
              self.paths.append(copy.copy(path))
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -362,6 +376,7 @@ class Semantic_Map:
      def publish_paths(self):
          ma = MarkerArray()
          for i in range(len(self.paths)):
+
              bbox, text = self.paths[i].get_marker()
              ma.markers.append(copy.deepcopy(bbox))
              ma.markers.append(copy.deepcopy(text))

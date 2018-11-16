@@ -5,82 +5,70 @@
 #--------------- ROOMS -------------------------------#
 rooms:
     - name : kitchen
-      pose1: [5.06,-0.37] #top_left
-      pose2: [8.9,-0.76]  #top_right
-      pose3: [8.08,-4.43] #bottom_right
-      pose4: [4.24,-3.6] #bottom_left
+      pose1: [4.70,-3.23] #top_left
+      pose2: [4.85,0.53]  #top_right
+      pose3: [8.58,0.40] #bottom_right
+      pose4: [8.57,-3.12] #bottom_left
+    - name : dining_room
+      pose1: [4.68,-5.7] #top_left
+      pose2: [4.74,-3.18]  #top_right
+      pose3: [8.58,-3.32] #bottom_right
+      pose4: [8.53,-5.85] #bottom_left
     - name : living_room
-      pose1: [4.23,-3.7] #top_left
-      pose2: [8.04,-4.54]  #top_right
-      pose3: [7.08,-9.88] #bottom_right
-      pose4: [3.27,-9.27] #bottom_left
+      pose1: [4.63,-8.63] #top_left
+      pose2: [4.67,-5.80]  #top_right
+      pose3: [8.57,-5.80] #bottom_right
+      pose4: [8.50,-8.68] #bottom_left
     - name : bedroom
-      pose1: [0.8,-4.0] #top_left
-      pose2: [4.02,-4.55]  #top_right
-      pose3: [3.22,-9.26] #bottom_right
-      pose4: [0.14,-8.64] #bottom_left
+      pose1: [1.38,-8.64] #top_left
+      pose2: [1.49,-3.84]  #top_right
+      pose3: [4.72,-3.90] #bottom_right
+      pose4: [4.60,-8.62] #bottom_left
     - name : bathroom
-      pose1: [1.37,-1.18] #top_left
-      pose2: [4.6,-1.8]  #top_right
-      pose3: [4.01,-4.49] #bottom_right
-      pose4: [0.83,-4.0] #bottom_left
+      pose1: [1.44,-3.74] #top_left
+      pose2: [1.55,-0.96]  #top_right
+      pose3: [4.79,-1.06] #bottom_right
+      pose4: [4.69,-3.80] #bottom_left
     - name : entrance
-      pose1: [1.61,0.35] #top_left
-      pose2: [3.49,-0.01]  #top_right
-      pose3: [3.2,-1.55] #bottom_right
-      pose4: [1.37,-1.14] #bottom_left
+      pose1: [1.47,-0.97] #top_left
+      pose2: [1.52,0.62]  #top_right
+      pose3: [3.44,0.55] #bottom_right
+      pose4: [3.37,-0.98] #bottom_left
     - name : corridor
-      pose1: [3.52,-0.01] #top_left
-      pose2: [5.01,-0.18]  #top_right
-      pose3: [4.6,-1.85] #bottom_right
-      pose4: [3.26,-1.58] #bottom_left
+      pose1: [3.37,-0.98] #top_left
+      pose2: [3.44,0.55]  #top_right
+      pose3: [4.85,0.53] #bottom_right
+      pose4: [4.78,-1.04] #bottom_left
 
 
 
 #--------------- LINKS (DOORS)-----------------------#
 connections: #open 0 (False), 1 (True), 2 (Unknown)
-    - name: con1
-      rooms: ["kitchen","living_room"]
-      corner1: [0.0,0.0]
-      corner2: [0.0,0.0]
-      door: false
-      open: 1
-    - name: con2
-      rooms: ["kitchen","bathroom"]
-      corner1: [4.5,-2.3]
-      corner2: [4.4,-2.8]
-      door: true
-      open: 1
-    - name: con3
+    - name: door1
       rooms: ["living_room","bedroom"]
-      corner1: [3.86,-5.69]
-      corner2: [3.67,-6.6]
+      waypoint1: [5.01,-5.37,1]
+      waypoint2: [4.25,-5.33,1]
       door: true
       open: 1
-    - name: con4
+    - name: door2
       rooms: ["bedroom","bathroom"]
-      corner1: [2.24,-4.25]
-      corner2: [3.6,-4.48]
+      waypoint1: [3.89,-4.33,0.5]
+      waypoint2: [3.85,-3.46,1]
       door: true
-      open: 0
-    - name: con5
-      rooms: ["Unknown","entrance"]
-      corner1: [0.0,0.0]
-      corner2: [1.0,0.0]
-      door: false
-      open: 0
-    - name: con6
+      open: 1
+    - name: door3
+      rooms: ["bathroom","kitchen"]
+      waypoint1: [4.36,-1.76,0]
+      waypoint2: [5.04,-1.73,0]
+      door: true
+      open: 1
+    - name: door4
       rooms: ["entrance","corridor"]
-      corner1: [0.0,0.0]
-      corner2: [1.0,0.0]
-      door: false
-      open: 0
-    - name: con7
-      rooms: ["corridor","kitchen"]
-      corner1: [5.0,3.0]
-      corner2: [3.0,3.0]
-      door: false
-      open: 0
+      waypoint1: [2.98,-0.27,0]
+      waypoint2: [3.75,-0.27,0]
+      door: true
+      open: 1
+
 
 
 
@@ -140,6 +128,24 @@ waypoints:
         room : bathroom
 
 
-paths:
-      - name: path1
-        waypoints: ["door_livingroom_to_bedroom","door_bedroom_to_livingroom","door_kitchen_to_bathroom"]
+paths: # type 0 door type 1 waypoint
+      - name: survey1
+        poses:
+            - type: 0
+              name: door4
+              forward: true
+            - type: 0
+              name: door3
+              forward: false
+            - type: 0
+              name: door2
+              forward: false
+            - type: 0
+              name: door1
+              forward: false
+            - type: 0
+              name: door3
+              forward: false
+
+
+
