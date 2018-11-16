@@ -74,11 +74,11 @@ connections: #open 0 (False), 1 (True), 2 (Unknown)
 
 objects:
     - name: bottle
-      seen: false
-      mapped: true
-      pose: [0.0,0.0,0.0]
-      room: ''
-      furniture: ''
+      seen: true
+      mapped: false
+      pose: [6.6,-1.7,0.85]
+      room: 'kitchen'
+      furniture: 'kitchen_table'
       expected_rooms: ["kitchen","living_room"] # Ordered to most likely to less likely
       expected_furniture: ["kitchen_table","tv_table"]
 
@@ -89,43 +89,117 @@ furniture:
       mapped: true
       seen: false
       room: kitchen
-      pose: [6.4,-2.4]
-      orientation: 1.3
-      size: [1,0.6,1.0]
+      pose: [6.6,-2.1]
+      orientation: 0
+      size: [0.8,1.25,0.8]
+    - name: counter
+      static: true
+      mapped: true
+      seen: false
+      room: kitchen
+      pose: [8.3,-1.4]
+      orientation: 0
+      size: [0.7,3.6,1]
+    - name: kitchen_sink
+      static: true
+      mapped: true
+      seen: false
+      room: kitchen
+      pose: [7.37,0.16]
+      orientation: 1.56
+      size: [0.7,1.4,1]
+
+    - name: dining_table
+      static: true
+      mapped: true
+      seen: false
+      room: dining_room
+      pose: [7.6,-4.52]
+      orientation: 1.56
+      size: [0.85,1.40,0.6]
+
     - name: tv_table
       static: true
       mapped: true
       seen: false
       room: living_room
-      pose: [5.3,-8.3]
-      orientation: -0.2
-      size: [0.6,0.6,0.4]
+      pose: [8.31,-7.23]
+      orientation: 0
+      size: [0.25,1.8,0.4]
+    - name: shelf
+      static: true
+      mapped: true
+      seen: false
+      room: living_room
+      pose: [8.3,-6]
+      orientation: 0
+      size: [0.3,0.6,1.4]
+    - name: sofa
+      static: true
+      mapped: true
+      seen: false
+      room: living_room
+      pose: [5.1,-7.18]
+      orientation: 0
+      size: [0.9,1.6,0.5]
 
+    - name: bed
+      static: true
+      mapped: true
+      seen: false
+      room: bedroom
+      pose: [2.41,-5.82]
+      orientation: 1.57
+      size: [1.5,2,0.5]
+    - name: bedside_table
+      static: true
+      mapped: true
+      seen: false
+      room: bedroom
+      pose: [1.62,-6.8]
+      orientation: 0
+      size: [0.38,0.53,0.6]
+    - name: closet
+      static: true
+      mapped: true
+      seen: false
+      room: bedroom
+      pose: [4.28,-7.56]
+      orientation: 0
+      size: [0.6,1.1,1.8]
+    - name: chest
+      static: true
+      mapped: true
+      seen: false
+      room: bedroom
+      pose: [2.55,-8.35]
+      orientation: 1.57
+      size: [0.6,2,0.7]
 
-
+    - name: toilet
+      static: true
+      mapped: true
+      seen: false
+      room: bathroom
+      pose: [3.11,-1.38]
+      orientation: 0
+      size: [0.5,0.7,0.6]
+    - name: sink
+      static: true
+      mapped: true
+      seen: false
+      room: bathroom
+      pose: [2.27,-1.2]
+      orientation: 0
+      size: [0.4,0.3,0.8]
 
 #--------------------------------------------------------#
 #--------------- NAVIGATION -----------------------------#
 #--------------------------------------------------------#
 waypoints:
-      - name : door_livingroom_to_bedroom
+      - name : wayoint1
         pose: [4.17,-6.12]
         room: living_room
-      - name : door_bedroom_to_livingroom
-        pose: [3.31,-6.04]
-        room: bedroom
-      - name : door_kitchen_to_bathroom
-        pose: [4.77,-2.56]
-        room : kitchen
-      - name : door_bathroom_to_kitchen
-        pose: [3.97,-2.39]
-        room : bathroom
-      - name : door_bedroom_to_bathroom
-        pose: [3.14,-4.81]
-        room : bedroom
-      - name : door_bathroom_to_bedroom
-        pose: [3.32, -3.96]
-        room : bathroom
 
 
 paths: # type 0 door type 1 waypoint
