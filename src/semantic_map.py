@@ -135,6 +135,14 @@ class Semantic_Map:
          print("Done!")
          return EmptyResponse()
 
+     def delete_map():
+         del self.current_map[:] #Landmark
+         del self.current_furniture[:] # Furniture
+         del self.regions[:] # Regions
+         del self.waypoints[:] # Waypoints
+         del self.connections[:] # Doors
+         del self.paths[:] # Paths
+
 
      def export_map(self,call):
          pass #TODO
@@ -202,6 +210,7 @@ class Semantic_Map:
 #--------- Load from param server --------------#
      def load_from_param(self):
          print("Deleting previous data...")
+         self.delete_map()
          print("Loading from param server")
          self.get_waypoints("/waypoints")
          self.get_regions("/rooms")
