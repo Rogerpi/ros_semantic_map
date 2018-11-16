@@ -1,0 +1,20 @@
+<launch>
+    <!--<arg name="marker1Id"         default="582"/>-->
+
+    <node pkg="tf" type="static_transform_publisher" name="map_align" args="4 -4.5 0 -0.15 0 0 map map_align 100" />
+
+
+    <rosparam command="load" file="$(find robot_map)/config/semantic_map.yaml" />
+
+    <node pkg="robot_map" type="semantic_map.py" name="semantic_map" output="screen">
+        <!--<remap from="/camera_info" to="/stereo/$(arg eye)/camera_info" />-->
+        <!--<param name="image_is_rectified" value="True"/>-->
+
+    </node>
+
+
+
+
+
+
+</launch>
