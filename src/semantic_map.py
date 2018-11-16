@@ -94,6 +94,8 @@ class Semantic_Map:
 
          self.pub_data_timer = rospy.Timer(rospy.Duration(1), self.publish_data)
 
+         self.load_from_param()
+
          print("Ready!")
 
 #--------- ADD TO MAP --------------------------#
@@ -198,7 +200,8 @@ class Semantic_Map:
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 #--------- Load from param server --------------#
-     def load_from_param(self,call):
+     def load_from_param(self):
+         print("Deleting previous data...")
          print("Loading from param server")
          self.get_waypoints("/waypoints")
          self.get_regions("/rooms")
@@ -206,8 +209,11 @@ class Semantic_Map:
          self.get_furniture("/furniture")
          self.get_connections("/connections")
          self.get_paths("/paths")
-         return EmptyResponse()
 
+
+    def load_from_param_srv(self,call):
+        self.load_from_param()
+        return EmptyResponse()
 
      def get_waypoints(self,name):
          waypoints = rospy.get_param(name)
