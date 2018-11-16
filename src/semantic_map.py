@@ -77,7 +77,7 @@ class Semantic_Map:
 
          ##Services
          #Load from YAML
-         self.load_from_param_srv = rospy.Service('/semantic_map/load_from_param', Empty, self.load_from_param)
+         self.load_from_param_srv = rospy.Service('/semantic_map/load_from_param', Empty, self.load_from_param_srv)
 
          #Mapping
          self.finish_mapping_srv = rospy.Service('/semantic_map/save_map', Empty, self.save_map)
@@ -136,7 +136,7 @@ class Semantic_Map:
          print("Done!")
          return EmptyResponse()
 
-     def delete_map():
+     def delete_map(self):
          del self.current_map[:] #Landmark
          del self.current_furniture[:] # Furniture
          del self.regions[:] # Regions
@@ -221,9 +221,9 @@ class Semantic_Map:
          self.get_paths("/paths")
 
 
-    def load_from_param_srv(self,call):
-        self.load_from_param()
-        return EmptyResponse()
+     def load_from_param_srv(self,call):
+         self.load_from_param()
+         return EmptyResponse()
 
      def get_waypoints(self,name):
          waypoints = rospy.get_param(name)

@@ -35,13 +35,14 @@ class Region:
         self.id = id
         self.points = points
         self.inside = inside # Region
+        self.frame_id = frame_id
 
 
 
     def send_goal(self,client):
 
         goal = MoveBaseGoal()
-        goal.target_pose.header.frame_id = "map"
+        goal.target_pose.header.frame_id = self.frame_id
         goal.target_pose.header.stamp = rospy.Time.now()
         goal.target_pose.pose.position.x = sum(p.x for p in self.points)/4
         goal.target_pose.pose.position.y = sum(p.y for p in self.points)/4
