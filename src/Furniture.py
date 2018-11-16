@@ -198,7 +198,7 @@ class Furniture:
 
         marker.pose.position.x = self.pose[0]
         marker.pose.position.y = self.pose[1]
-        marker.pose.position.z = self.pose[2]
+        marker.pose.position.z = self.self.size[2]/2
 
         marker.pose.orientation.x = self.orientation[0]
         marker.pose.orientation.y = self.orientation[1]
@@ -255,7 +255,7 @@ class Furniture:
 
         marker.pose.position.x = self.mapped_pose[0]
         marker.pose.position.y = self.mapped_pose[1]
-        marker.pose.position.z = self.mapped_pose[2]
+        marker.pose.position.z = self.size[2]/2
 
         marker.pose.orientation.x = self.mapped_orientation[0]
         marker.pose.orientation.y = self.mapped_orientation[1]
