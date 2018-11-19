@@ -65,12 +65,12 @@ class Semantic_Map:
 
 
          #Publishers
-         self.regions_pub = rospy.Publisher('/semantic_map/regions', MarkerArray , queue_size=10)
-         self.waypoints_pub = rospy.Publisher('/semantic_map/waypoints', MarkerArray , queue_size=10)
-         self.landmarks_pub = rospy.Publisher('/semantic_map/landmarks', MarkerArray , queue_size=10)
-         self.furniture_pub = rospy.Publisher('/semantic_map/furniture', MarkerArray , queue_size=10)
-         self.connections_pub = rospy.Publisher('/semantic_map/connections', MarkerArray , queue_size=10)
-         self.paths_pub = rospy.Publisher('/semantic_map/paths',MarkerArray,queue_size = 10)
+         self.regions_pub = rospy.Publisher('/semantic_map/viz/regions', MarkerArray , queue_size=10)
+         self.waypoints_pub = rospy.Publisher('/semantic_map/viz/waypoints', MarkerArray , queue_size=10)
+         self.landmarks_pub = rospy.Publisher('/semantic_map/viz/landmarks', MarkerArray , queue_size=10)
+         self.furniture_pub = rospy.Publisher('/semantic_map/viz/furniture', MarkerArray , queue_size=10)
+         self.connections_pub = rospy.Publisher('/semantic_map/viz/connections', MarkerArray , queue_size=10)
+         self.paths_pub = rospy.Publisher('/semantic_map/viz/paths',MarkerArray,queue_size = 10)
 
          self.semantic_pub = rospy.Publisher('/semantic_map/map',ObjectArray,queue_size = 10)
          self.doors_pub = rospy.Publisher('/semantic_map/doors_map',DoorStatusArray,queue_size = 10)
