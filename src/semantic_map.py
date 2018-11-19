@@ -342,7 +342,6 @@ class Semantic_Map:
              open = connections[i].get("open",2)
              rooms = connections[i].get("rooms")
              #position = connections[i].get("position")
-             print(open)
              con = Connection( connections[i].get("name"),rooms,waypoint1,waypoint2,open)
              self.connections.append(copy.deepcopy(con))
          print("connections_set")

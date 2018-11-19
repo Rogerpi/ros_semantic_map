@@ -46,7 +46,6 @@ class Connection:
         self.waypoint2_b = Waypoint(self.id+"_2",self.waypoint2_pose[0],self.waypoint2_pose[1],self.waypoint2_pose[2]-3.14,self.rooms[1],self.frame_id)
         self.status = 2
         self.mapped = True
-        print("open "+str(open))
         self.mapped_status = int(open)
         self.seen = False
         self.mapped_time = rospy.Time.now()
