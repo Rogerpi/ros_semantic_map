@@ -70,6 +70,9 @@ class Semantic_Map:
          self.furniture_pub = rospy.Publisher('/semantic_map/furniture', MarkerArray , queue_size=10)
          self.connections_pub = rospy.Publisher('/semantic_map/connections', MarkerArray , queue_size=10)
          self.paths_pub = rospy.Publisher('/semantic_map/paths',MarkerArray,queue_size = 10)
+
+         self.semantic_pub = rospy.Publisher('/semantic_map/map',ObjectArray,queue_size = 10)
+
          ##Subscribers
          self.landmark_detection_sub = rospy.Subscriber('/semantic_map/landmark_detection',Detection,self.add_landmark)
 
@@ -439,7 +442,10 @@ class Semantic_Map:
          for i in range(len(self.current_map)):
              obj = self.current_map[i].get_object_msg()
              oa.objects.append(copy.deepcopy(obj))
-         self.map_pub.publish(oa)
+         for i in range(len(self.current_furniture)):
+             obj = self.current_furniture[i].get_object_msg()
+             oa.objects.append(copy.deepcopy(obj))
+         self.semantic_pub.publish(oa)
 
 
 
@@ -457,7 +463,7 @@ class Semantic_Map:
              self.publish_connections()
              self.publish_paths()
 
-             #self.publish_map() #TODO: Finish
+             self.publish_map() #TODO: Finish
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 

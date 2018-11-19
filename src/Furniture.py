@@ -121,6 +121,15 @@ class Furniture:
     def get_expected_rooms(self): # return string list
         return self.expected_rooms
 
+    def has_changed(self):
+        if self.mapped and self.seen:
+            if self.room != self.mapped_room:
+                return 1
+            else:
+                return 0
+        else:
+            return 2
+
 
     #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
@@ -293,3 +302,24 @@ class Furniture:
         return marker, text
 
 
+
+    def get_object_msg(self):
+        obj = Object()
+        obj.header.frame_id = self.frame_id
+        obj.header.stamp = rospy.Time.now()
+        obj.type = "Furniture"
+        obj.name = self.id
+        obj.seen = self.seen
+        obj.mapped = self.mapped
+        obj.static = self.static
+        if self.seen:
+            obj.current_position.position.x = self.pose[0]
+            obj.current_position.position.y = self.pose[1]
+            obj.current_room = self.room
+        if self.mapped:
+            obj.mapped_position.position.x = self.mapped_pose[0]
+            obj.mapped_position.position.y = self.mapped_pose[1]
+            obj.mapped_room = self.mapped_room
+        obj.changed = self.has_changed()
+
+        return obj

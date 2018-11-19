@@ -42,7 +42,7 @@ class Connection:
         self.waypoint2 = Waypoint(self.id+"_2",self.waypoint2_pose[0],self.waypoint2_pose[1],self.waypoint2_pose[2],self.rooms[1],self.frame_id)
         self.waypoint1_b = Waypoint(self.id+"_1",self.waypoint1_pose[0],self.waypoint1_pose[1],self.waypoint1_pose[2]-3.14,self.rooms[0],self.frame_id)
         self.waypoint2_b = Waypoint(self.id+"_2",self.waypoint2_pose[0],self.waypoint2_pose[1],self.waypoint2_pose[2]-3.14,self.rooms[1],self.frame_id)
-
+        self.last_state = 2
 
     def send_goal(self,client):
         #TODO
@@ -61,10 +61,14 @@ class Connection:
             return self.waypoint1_b
 
     def set_status(self,open):
+        self.last_state = self.open
         self.open = open
 
     def get_status(self):
         return self.open
+
+    def has_changed(self):
+        return self.open != self.last_state
 
 
 
@@ -121,9 +125,6 @@ class Connection:
         text.lifetime.secs = 2
 
         return marker, text
-
-
-
 
 
 
