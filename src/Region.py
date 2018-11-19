@@ -31,11 +31,12 @@ from tf import TransformListener
 # Regions (Rooms)
 # -----------------------------------------------------------------------------------#
 class Region:
-    def __init__(self,id,points,inside=None,frame_id = "map_align"):
+    def __init__(self,id,points,goal,inside=None,frame_id = "map_align"):
         self.id = id
         self.points = points
         self.inside = inside # Region
         self.frame_id = frame_id
+        self.goal = goal
 
 
 
@@ -44,8 +45,8 @@ class Region:
         goal = MoveBaseGoal()
         goal.target_pose.header.frame_id = self.frame_id
         goal.target_pose.header.stamp = rospy.Time.now()
-        goal.target_pose.pose.position.x = sum(p.x for p in self.points)/4
-        goal.target_pose.pose.position.y = sum(p.y for p in self.points)/4
+        goal.target_pose.pose.position.x = self.goal[0] #sum(p.x for p in self.points)/4
+        goal.target_pose.pose.position.y = self.goal[1] #sum(p.y for p in self.points)/4
         goal.target_pose.pose.orientation.w = 1.0
 
         print("Goal to Region "+str(self.id))

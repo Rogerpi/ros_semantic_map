@@ -36,6 +36,8 @@ from Furniture import Furniture
 from Connection import Connection
 from Path import Path
 
+from std_srvs.srv import Empty, EmptyResponse
+
 #from Path import Path
 #from Furniture import Furniture
 
@@ -176,6 +178,8 @@ class Semantic_Map:
          if selected == None:
              response.success = False
          else:
+             clear_costmap = rospy.ServiceProxy('/move_base/clear_costmaps', Empty)
+             clear_costmap()
              selected.send_goal(self.goal_client)
              response.success = True
          return response
@@ -186,6 +190,8 @@ class Semantic_Map:
          if selected == None:
              response.success = False
          else:
+             clear_costmap = rospy.ServiceProxy('/move_base/clear_costmaps', Empty)
+             clear_costmap()
              selected.send_goal(self.goal_client)
              response.success = True
          return response
@@ -196,16 +202,21 @@ class Semantic_Map:
          if selected == None:
              response.success = False
          else:
+             clear_costmap = rospy.ServiceProxy('/move_base/clear_costmaps', Empty)
+             clear_costmap()
              selected.send_goal(self.goal_client)
              response.success = True
          return response
 
      def follow_path(self,call):
          selected = next((x for x in self.paths if x.id == call.goal_name), None)
+         print(selected.id)
          response = SemanticGoalResponse()
          if selected == None:
              response.success = False
          else:
+             clear_costmap = rospy.ServiceProxy('/move_base/clear_costmaps', Empty)
+             clear_costmap()
              selected.execute(self.goal_client)
              response.success = True
          return response
@@ -244,6 +255,7 @@ class Semantic_Map:
              position2 = regions[i].get("pose2")
              position3 = regions[i].get("pose3")
              position4 = regions[i].get("pose4")
+             goal = regions[i].get("goal")
 
              positions = []
 
@@ -273,7 +285,7 @@ class Semantic_Map:
              positions.append(p3)
              positions.append(p4)
 
-             region = Region( regions[i].get("name"),positions)
+             region = Region( regions[i].get("name"),positions,goal)
 
              self.regions.append(copy.deepcopy(region))
 
@@ -332,13 +344,15 @@ class Semantic_Map:
      def get_paths(self,name):
          paths = rospy.get_param(name)
          for path_item in paths:
-             path = Path(path_item.get("name"))
+             path = None
+             path = Path(path_item.get("name"),[])
              wp_list = path_item.get("poses")
              for wp in wp_list:
 
                 is_door = wp.get("type") == 0
                 name = wp.get("name")
                 if is_door:
+
                     move_forward = wp.get("forward")
                     door = next((d for d in self.connections if d.id == name ), None)
                     waypoint1 = door.get_first_waypoint(move_forward)
@@ -350,7 +364,7 @@ class Semantic_Map:
                     wayp = next((w for w in self.waypoints if w.id == name ), None)
                     path.append(wayp)
 
-             self.paths.append(copy.copy(path))
+             self.paths.append(copy.deepcopy(path))
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
@@ -430,9 +444,12 @@ class Semantic_Map:
 
 
      def publish_data(self,event):
+
          if not self.pub_data_timer.is_alive():
+
              self.pub_data_timer.shutdown()
          else:
+
              self.publish_regions()
              self.publish_waypoints()
              self.publish_landmarks()
@@ -452,6 +469,7 @@ if __name__ == '__main__':
 
     # ROS initializzation
     rospy.init_node('semantic_map', anonymous=False)
+
 
     node = Semantic_Map(sys.argv[1])
     rospy.spin()

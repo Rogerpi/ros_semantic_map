@@ -9,65 +9,80 @@ rooms:
       pose2: [4.85,0.53]  #top_right
       pose3: [8.58,0.40] #bottom_right
       pose4: [8.57,-3.12] #bottom_left
+      goal: [6.01,-1.65,0.0]
     - name : dining_room
       pose1: [4.68,-5.7] #top_left
       pose2: [4.74,-3.18]  #top_right
       pose3: [8.58,-3.32] #bottom_right
       pose4: [8.53,-5.85] #bottom_left
+      goal: [5.62,-5.25,0.0]
     - name : living_room
       pose1: [4.63,-8.63] #top_left
       pose2: [4.67,-5.80]  #top_right
       pose3: [8.57,-5.80] #bottom_right
       pose4: [8.50,-8.68] #bottom_left
+      goal: [6.37,-8.28,1.56]
     - name : bedroom
       pose1: [1.38,-8.64] #top_left
       pose2: [1.49,-3.84]  #top_right
       pose3: [4.72,-3.90] #bottom_right
       pose4: [4.60,-8.62] #bottom_left
+      goal: [3.24,-5.11,0.0]
     - name : bathroom
       pose1: [1.44,-3.74] #top_left
       pose2: [1.55,-0.96]  #top_right
       pose3: [4.79,-1.06] #bottom_right
       pose4: [4.69,-3.80] #bottom_left
+      goal: [3.43,-2.97,0.0]
     - name : entrance
       pose1: [1.47,-0.97] #top_left
       pose2: [1.52,0.62]  #top_right
       pose3: [3.44,0.55] #bottom_right
       pose4: [3.37,-0.98] #bottom_left
+      goal: [2.56,-0.56,0.0]
     - name : corridor
       pose1: [3.37,-0.98] #top_left
       pose2: [3.44,0.55]  #top_right
       pose3: [4.85,0.53] #bottom_right
       pose4: [4.78,-1.04] #bottom_left
+      goal: [4.2,-0.9,0.0]
 
 
 
 #--------------- LINKS (DOORS)-----------------------#
 connections: #open 0 (False), 1 (True), 2 (Unknown)
-    - name: door1
+    - name: livingroom_bedroom
       rooms: ["living_room","bedroom"]
-      waypoint1: [5.01,-5.37,1]
-      waypoint2: [4.25,-5.33,1]
+      waypoint1: [5.01,-5.37,3.14]
+      waypoint2: [4.25,-5.33,3.14]
       door: true
       open: 1
-    - name: door2
+    - name: bedroom_bathroom
       rooms: ["bedroom","bathroom"]
-      waypoint1: [3.89,-4.33,0.5]
-      waypoint2: [3.85,-3.46,1]
+      waypoint1: [3.89,-4.33,1.56]
+      waypoint2: [3.85,-3.46,1.56]
       door: true
       open: 1
-    - name: door3
+    - name: bathroom_kitchen
       rooms: ["bathroom","kitchen"]
-      waypoint1: [4.36,-1.76,0]
-      waypoint2: [5.04,-1.73,0]
+      waypoint1: [4.36,-1.76,3.14]
+      waypoint2: [5.04,-1.73,3.14]
       door: true
       open: 1
-    - name: door4
+    - name: entrance_corridor
       rooms: ["entrance","corridor"]
-      waypoint1: [2.98,-0.27,0]
-      waypoint2: [3.75,-0.27,0]
+      waypoint1: [2.98,-0.27,0.0]
+      waypoint2: [3.75,-0.27,0.0]
       door: true
       open: 1
+    - name: fake_door
+      rooms: ["dining_room","kitchen"]
+      waypoint2: [5.8,-3.94,1.56]
+      waypoint1: [5.8,-5.26,1.56]
+    - name: side_bed_con
+      rooms: ["bedroom","bedroom"]
+      waypoint1: [3.9,-6.5,-2.20]
+      waypoint2: [3.44,-7.2,-2.20]
 
 
 
@@ -206,20 +221,48 @@ paths: # type 0 door type 1 waypoint
       - name: survey1
         poses:
             - type: 0
-              name: door4
+              name: entrance_corridor
               forward: true
             - type: 0
-              name: door3
+              name: bathroom_kitchen
               forward: false
             - type: 0
-              name: door2
+              name: bedroom_bathroom
               forward: false
             - type: 0
-              name: door1
+              name: livingroom_bedroom
               forward: false
             - type: 0
-              name: door3
+              name: fake_door
+              forward: true
+            - type: 0
+              name: bathroom_kitchen
               forward: false
+            - type: 0
+              name: bedroom_bathroom
+              forward: false
+            - type: 0
+              name: livingroom_bedroom
+              forward: false
+            - type: 0
+              name: fake_door
+              forward: true
+      - name: survey2
+        poses:
+            - type: 0
+              name: livingroom_bedroom
+              forward: true
+            - type: 0
+              name: side_bed_con
+              forward: true
+            - type: 0
+              name: side_bed_con
+              forward: false
+            - type: 0
+              name: livingroom_bedroom
+              forward: false
+
+
 
 
 

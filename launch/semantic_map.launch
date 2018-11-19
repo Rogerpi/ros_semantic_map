@@ -7,7 +7,7 @@
 
     <rosparam command="load" file="$(find robot_map)/config/semantic_map.yaml" />
 
-    <node pkg="robot_map" type="semantic_map.py" name="semantic_map" output="screen">
+    <node pkg="robot_map" type="semantic_map.py" name="semantic_map" args="map_align" output="screen">
         <!--<remap from="/camera_info" to="/stereo/$(arg eye)/camera_info" />-->
         <!--<param name="image_is_rectified" value="True"/>-->
 
