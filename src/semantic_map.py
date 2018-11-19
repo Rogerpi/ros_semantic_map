@@ -15,6 +15,7 @@ from tf import TransformListener
 
 from robot_map.msg import Detection
 from robot_map.msg import Object, ObjectArray
+from robot_map.msg import DoorStatus, DoorStatusArray
 
 #Actions
 import actionlib
@@ -72,6 +73,7 @@ class Semantic_Map:
          self.paths_pub = rospy.Publisher('/semantic_map/paths',MarkerArray,queue_size = 10)
 
          self.semantic_pub = rospy.Publisher('/semantic_map/map',ObjectArray,queue_size = 10)
+         self.doors_pub = rospy.Publisher('/semantic_map/doors_map',DoorStatusArray,queue_size = 10)
 
          ##Subscribers
          self.landmark_detection_sub = rospy.Subscriber('/semantic_map/landmark_detection',Detection,self.add_landmark)
@@ -337,9 +339,10 @@ class Semantic_Map:
              waypoint1 = connections[i].get("waypoint1")
              waypoint2 = connections[i].get("waypoint2")
              #door = connections[i].get("door")
-             open = connections[i].get("open")
+             open = connections[i].get("open",2)
              rooms = connections[i].get("rooms")
              #position = connections[i].get("position")
+             print(open)
              con = Connection( connections[i].get("name"),rooms,waypoint1,waypoint2,open)
              self.connections.append(copy.deepcopy(con))
          print("connections_set")
@@ -439,6 +442,7 @@ class Semantic_Map:
 
      def publish_map(self):
          oa = ObjectArray()
+         da = DoorStatusArray()
          for i in range(len(self.current_map)):
              obj = self.current_map[i].get_object_msg()
              oa.objects.append(copy.deepcopy(obj))
@@ -446,6 +450,10 @@ class Semantic_Map:
              obj = self.current_furniture[i].get_object_msg()
              oa.objects.append(copy.deepcopy(obj))
          self.semantic_pub.publish(oa)
+         for i in range(len(self.connections)):
+             door = self.connections[i].get_door_msg()
+             da.doors.append(copy.deepcopy(door))
+         self.doors_pub.publish(da)
 
 
 

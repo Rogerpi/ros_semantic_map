@@ -53,6 +53,8 @@ find_package(catkin REQUIRED COMPONENTS
    Detection.msg
    Object.msg
    ObjectArray.msg
+   DoorStatus.msg
+   DoorStatusArray.msg
 #   Message2.msg
  )
 

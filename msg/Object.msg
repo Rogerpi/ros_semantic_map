@@ -11,7 +11,6 @@ uint8 changed # 0 No, 1 Yes, 2 Unknown (if unknown, previous data not used)
 geometry_msgs/Pose mapped_position
 string mapped_room
 string mapped_place
-uint8 state # Doors only
 
 
 

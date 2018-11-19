@@ -26,6 +26,9 @@ from robot_map.srv import SemanticGoal, SemanticGoalResponse
 from tf import TransformListener
 
 from Waypoint import Waypoint
+
+from robot_map.msg import DoorStatus, DoorStatusArray
+
 # -----------------------------------------------------------------------------------#
 # Connection between rooms
 # -----------------------------------------------------------------------------------#
@@ -33,7 +36,6 @@ class Connection:
     def __init__(self,id,rooms,waypoint1, waypoint2, open = True, frame_id = "map_align"):
         self.id = id
         self.rooms = rooms
-        self.open = open
         self.position = [(waypoint1[0] + waypoint2[0])/2,(waypoint1[1] + waypoint2[1])/2]
         self.waypoint1_pose = waypoint1
         self.waypoint2_pose = waypoint2
@@ -42,7 +44,13 @@ class Connection:
         self.waypoint2 = Waypoint(self.id+"_2",self.waypoint2_pose[0],self.waypoint2_pose[1],self.waypoint2_pose[2],self.rooms[1],self.frame_id)
         self.waypoint1_b = Waypoint(self.id+"_1",self.waypoint1_pose[0],self.waypoint1_pose[1],self.waypoint1_pose[2]-3.14,self.rooms[0],self.frame_id)
         self.waypoint2_b = Waypoint(self.id+"_2",self.waypoint2_pose[0],self.waypoint2_pose[1],self.waypoint2_pose[2]-3.14,self.rooms[1],self.frame_id)
-        self.last_state = 2
+        self.status = 2
+        self.mapped = True
+        print("open "+str(open))
+        self.mapped_status = int(open)
+        self.seen = False
+        self.mapped_time = rospy.Time.now()
+        self.seen_time = rospy.Time.now()
 
     def send_goal(self,client):
         #TODO
@@ -61,14 +69,14 @@ class Connection:
             return self.waypoint1_b
 
     def set_status(self,open):
-        self.last_state = self.open
-        self.open = open
+        self.mapped_status= self.status
+        self.status = open
 
     def get_status(self):
-        return self.open
+        return self.status
 
     def has_changed(self):
-        return self.open != self.last_state
+        return self.status != self.mapped_status
 
 
 
@@ -94,11 +102,11 @@ class Connection:
         marker.pose.position.z = 0.5
 
         marker.color.a = 0.4
-        if self.open:
+        if self.status:
             marker.color.g = 1.0
         else:
             marker.color.r = 1.0
-        if self.open == 2:
+        if self.status == 2:
             marker.color.b = 1.0
         marker.ns = self.id
 
@@ -128,7 +136,19 @@ class Connection:
 
 
 
-
+    def get_door_msg(self):
+        door = DoorStatus()
+        door.name = self.id
+        door.seen = self.seen
+        door.mapped = self.mapped
+        if self.mapped:
+            door.mapped_time = self.mapped_time
+            door.mapped_status = self.mapped_status
+        if self.seen:
+            door.seen_time = self.seen_time
+            door.status = self.status
+        door.changed = self.has_changed()
+        return door
 
 
 

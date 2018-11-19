@@ -1,0 +1,9 @@
+Header header
+string name
+bool mapped
+uint8 mapped_status
+time mapped_time
+bool seen
+uint8 status
+time seen_time
+uint8 changed
