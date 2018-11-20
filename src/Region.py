@@ -26,6 +26,7 @@ from robot_map.srv import SemanticGoal, SemanticGoalResponse
 from tf import TransformListener
 
 
+import matplotlib.path as mplPath
 
 # -----------------------------------------------------------------------------------#
 # Regions (Rooms)
@@ -60,6 +61,15 @@ class Region:
             return client.get_result()
 
         self.frame_id = frame_id
+
+    def is_inside(self,position):
+
+        bbPath = mplPath.Path(np.array([[self.points[0].x, self.points[0].y],
+                                        [self.points[1].x, self.points[1].y],
+                                        [self.points[2].x, self.points[2].y],
+                                        [self.points[3].x, self.points[3].y])) #TODO dynamic filling, different shape
+
+        return bbPath.contains_point((position[0],position[1]))
 
     def get_marker(self):
 

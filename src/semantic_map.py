@@ -10,6 +10,7 @@ import sys
 #Topics
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import PoseStamped, Pose, Point
+from std_msgs.msg import String
 from tf2_msgs.msg import TFMessage
 from tf import TransformListener
 
@@ -66,6 +67,10 @@ class Semantic_Map:
 
          self.tf_listener = TransformListener()
 
+         self.current_region = None
+
+         self.position = [0.0,0.0]
+
 
          #Publishers
          self.regions_pub = rospy.Publisher('/semantic_map/viz/regions', MarkerArray , queue_size=10)
@@ -77,10 +82,11 @@ class Semantic_Map:
 
          self.semantic_pub = rospy.Publisher('/semantic_map/map',ObjectArray,queue_size = 10)
          self.doors_pub = rospy.Publisher('/semantic_map/doors_map',DoorStatusArray,queue_size = 10)
+         self.current_region_pub = rospy.Publisher('/semantic_map/current_room',String,queue_size = 10)
 
          ##Subscribers
          self.landmark_detection_sub = rospy.Subscriber('/semantic_map/landmark_detection',Detection,self.add_landmark)
-
+         self.odom_sub = rospy.Subscriber('/odom',Odom,self.odom_callback)
          ##Actions
          self.goal_client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
          self.goal_client.wait_for_server()
@@ -160,6 +166,14 @@ class Semantic_Map:
 
      def export_map(self,call):
          pass #TODO
+
+
+     def get_current_region(self):
+         for region in self.regions:
+             if region.is_inside(self.position):
+                 return region.id
+         return None
+
 
 
 
@@ -477,6 +491,13 @@ class Semantic_Map:
          self.doors_pub.publish(da)
 
 
+     def pub_current_region(self):
+         self.get_current_region()
+         if self.current_region == None:
+             self.pub_current_region(String(""))
+         else:
+             self.pub_current_region(String(self.current_region))
+
 
      def publish_data(self,event):
 
@@ -493,6 +514,13 @@ class Semantic_Map:
              self.publish_paths()
 
              self.publish_map() #TODO: Finish
+             self.pub_current_region()
+
+     def odom_callback(self,msg):
+         #TODO get position from odometry
+         return [0.0,0.0]
+
+
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
