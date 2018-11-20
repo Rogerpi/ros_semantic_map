@@ -39,6 +39,9 @@ from Path import Path
 
 from std_srvs.srv import Empty, EmptyResponse
 
+from FreePointFinder import FreePointFinder
+
+
 #from Path import Path
 #from Furniture import Furniture
 
@@ -197,6 +200,25 @@ class Semantic_Map:
          else:
              clear_costmap = rospy.ServiceProxy('/move_base/clear_costmaps', Empty)
              clear_costmap()
+             print("object pose: "+str(selected.mapped_pose))
+             '''
+             fpf = FreePointFinder('/home/roger/tiago_ws/src/robot_map/src/map.yaml')
+             #Transform to map
+             p = Pose()
+             p.position.x = selected.mapped_pose[0]
+             p.position.y = selected.mapped_pose[1]
+             pose_msg = PoseStamped()
+             pose_msg.pose = p
+             pose_msg.header.frame_id = selected.frame_id
+
+             object_world = self.tf_listener.transformPose("map",pose_msg)
+
+             x = object_world.pose.position.x
+             y = object_world.pose.position.y
+
+             print('Point ', 'is' if fpf.is_free(x,t) else 'is not', 'free')
+             print('Closest free point is', fpf.closest_free_point(x,y))
+             '''
              selected.send_goal(self.goal_client)
              response.success = True
          return response
