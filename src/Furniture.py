@@ -315,11 +315,22 @@ class Furniture:
         if self.seen:
             obj.current_position.position.x = self.pose[0]
             obj.current_position.position.y = self.pose[1]
+            obj.current_position.position.z = self.size[2]/2
+            obj.current_position.orientation.x = self.orientation[0]
+            obj.current_position.orientation.y = self.orientation[1]
+            obj.current_position.orientation.z = self.orientation[2]
+            obj.current_position.orientation.w = self.orientation[3]
             obj.current_room = self.room
         if self.mapped:
             obj.mapped_position.position.x = self.mapped_pose[0]
             obj.mapped_position.position.y = self.mapped_pose[1]
+            obj.mapped_position.position.z = self.size[2]/2
+            obj.mapped_position.orientation.x = self.mapped_orientation[0]
+            obj.mapped_position.orientation.y = self.mapped_orientation[1]
+            obj.mapped_position.orientation.z = self.mapped_orientation[2]
+            obj.mapped_position.orientation.w = self.mapped_orientation[3]
             obj.mapped_room = self.mapped_room
         obj.changed = self.has_changed()
+        obj.size = self.size
 
         return obj
