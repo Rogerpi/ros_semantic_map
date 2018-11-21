@@ -42,6 +42,8 @@ from std_srvs.srv import Empty, EmptyResponse
 
 from FreePointFinder import FreePointFinder
 
+from nav_msgs.msg import Odometry
+
 
 #from Path import Path
 #from Furniture import Furniture
@@ -86,7 +88,7 @@ class Semantic_Map:
 
          ##Subscribers
          self.landmark_detection_sub = rospy.Subscriber('/semantic_map/landmark_detection',Detection,self.add_landmark)
-         self.odom_sub = rospy.Subscriber('/odom',Odom,self.odom_callback)
+         self.odom_sub = rospy.Subscriber('/mobile_base_controller/odom',Odometry,self.odom_callback)
          ##Actions
          self.goal_client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
          self.goal_client.wait_for_server()
@@ -171,9 +173,10 @@ class Semantic_Map:
      def get_current_region(self):
          for region in self.regions:
              if region.is_inside(self.position):
-                 return region.id
-         return None
-
+                 self.current_region = region.id
+                 return
+         self.current_region = None
+         return
 
 
 
@@ -494,9 +497,9 @@ class Semantic_Map:
      def pub_current_region(self):
          self.get_current_region()
          if self.current_region == None:
-             self.pub_current_region(String(""))
+             self.current_region_pub.publish(String(""))
          else:
-             self.pub_current_region(String(self.current_region))
+             self.current_region_pub.publish(String(self.current_region))
 
 
      def publish_data(self,event):
@@ -517,8 +520,20 @@ class Semantic_Map:
              self.pub_current_region()
 
      def odom_callback(self,msg):
-         #TODO get position from odometry
-         return [0.0,0.0]
+         #TODO get position from odometry in semantic map frame
+
+        try:
+            p = Pose()
+            p = copy.deepcopy(msg.pose.pose)
+            pose_msg = PoseStamped()
+            pose_msg.pose = p
+            pose_msg.header.frame_id = msg.header.frame_id
+
+            object_world = self.tf_listener.transformPose(self.frame_id,pose_msg)
+
+            self.position = [object_world.pose.position.x,object_world.pose.position.y,0.0]
+        except:
+            print("Warning: No tf from odom frame to semantic map frame")
 
 
 
