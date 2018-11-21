@@ -1,8 +1,8 @@
 <launch>
-    <arg name="semantic_tf" default="true"/>
+    <arg name="semantic_tf" default="false"/>
 
 
-    <group if="$semantic_tf">
+    <group if="$(arg semantic_tf)">
         <node pkg="tf" type="static_transform_publisher" name="map_align" args="0 0 0 -0.15 0 0 map map_align 100" />
     </group>
 
