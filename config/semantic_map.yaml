@@ -75,7 +75,7 @@ connections: #open 0 (False), 1 (True), 2 (Unknown)
       waypoint2: [3.75,-0.27,0.0]
       door: true
       open: 1
-    - name: fake_door
+    - name: fake_link
       rooms: ["dining_room","kitchen"]
       waypoint2: [5.8,-3.94,1.56]
       waypoint1: [5.8,-5.26,1.56]
@@ -91,9 +91,9 @@ objects:
     - name: bottle
       seen: true
       mapped: false
-      pose: [6.6,-1.7,0.85]
-      room: 'kitchen'
-      furniture: 'kitchen_table'
+      pose: [7.13,-4.44,0.8]
+      room: 'dining_room'
+      furniture: 'dining_table'
       expected_rooms: ["kitchen","living_room"] # Ordered to most likely to less likely
       expected_furniture: ["kitchen_table","tv_table"]
 
@@ -106,7 +106,7 @@ furniture:
       room: kitchen
       pose: [6.6,-2.1]
       orientation: 0
-      size: [0.8,1.25,0.8]
+      size: [0.8,1.27,0.9] #measured
     - name: counter
       static: true
       mapped: true
@@ -114,7 +114,7 @@ furniture:
       room: kitchen
       pose: [8.3,-1.4]
       orientation: 0
-      size: [0.7,3.6,1]
+      size: [0.67,3.6,0.91] #measured
     - name: kitchen_sink
       static: true
       mapped: true
@@ -122,16 +122,16 @@ furniture:
       room: kitchen
       pose: [7.37,0.16]
       orientation: 1.56
-      size: [0.7,1.4,1]
+      size: [0.67,1.27,0.91] #measured
 
     - name: dining_table
       static: true
       mapped: true
       seen: false
       room: dining_room
-      pose: [7.6,-4.52]
+      pose: [7.7,-4.5]
       orientation: 1.56
-      size: [0.85,1.40,0.6]
+      size: [0.85,1.46,0.745] #measured
 
     - name: tv_table
       static: true
@@ -140,7 +140,7 @@ furniture:
       room: living_room
       pose: [8.31,-7.23]
       orientation: 0
-      size: [0.25,1.8,0.4]
+      size: [0.415,1.35,0.395] #measured
     - name: shelf
       static: true
       mapped: true
@@ -148,7 +148,7 @@ furniture:
       room: living_room
       pose: [8.3,-6]
       orientation: 0
-      size: [0.3,0.6,1.4]
+      size: [0.415,0.6,1.295] #measured
     - name: sofa
       static: true
       mapped: true
@@ -156,7 +156,7 @@ furniture:
       room: living_room
       pose: [5.1,-7.18]
       orientation: 0
-      size: [0.9,1.6,0.5]
+      size: [0.84,1.7,0.85] #slightly measured
 
     - name: bed
       static: true
@@ -165,7 +165,7 @@ furniture:
       room: bedroom
       pose: [2.41,-5.82]
       orientation: 1.57
-      size: [1.5,2,0.5]
+      size: [1.5,2,0.53] #measured (and nailed before)
     - name: bedside_table
       static: true
       mapped: true
@@ -173,7 +173,7 @@ furniture:
       room: bedroom
       pose: [1.62,-6.8]
       orientation: 0
-      size: [0.38,0.53,0.6]
+      size: [0.38,0.54,0.66] #measured
     - name: closet
       static: true
       mapped: true
@@ -181,7 +181,7 @@ furniture:
       room: bedroom
       pose: [4.28,-7.56]
       orientation: 0
-      size: [0.6,1.1,1.8]
+      size: [0.56,1.115,1.9] #measured
     - name: chest
       static: true
       mapped: true
@@ -189,7 +189,7 @@ furniture:
       room: bedroom
       pose: [2.55,-8.35]
       orientation: 1.57
-      size: [0.6,2,0.7]
+      size: [0.485,1.61,0.775] #measured
 
     - name: toilet
       static: true
@@ -198,7 +198,7 @@ furniture:
       room: bathroom
       pose: [3.11,-1.38]
       orientation: 0
-      size: [0.5,0.7,0.6]
+      size: [0.59,0.625,0.75] #measured
     - name: sink
       static: true
       mapped: true
@@ -206,47 +206,115 @@ furniture:
       room: bathroom
       pose: [2.27,-1.2]
       orientation: 0
-      size: [0.4,0.3,0.8]
+      size: [0.49,0.41,0.87] #measured
 
 #--------------------------------------------------------#
 #--------------- NAVIGATION -----------------------------#
 #--------------------------------------------------------#
 waypoints:
-      - name : wayoint1
-        pose: [4.17,-6.12]
+      - name : tbm1_1
+        pose: [5.2,-0.41,0.0] # ^
+        room: kitchen
+      - name: tbm1_2
+        pose: [6.26,-0.61,0.0] # ^
+        room: kitchen
+      - name: tbm1_3
+        pose: [7.42,-0.85,0.0] #turn this left >
+        room: kitchen
+      - name: tbm1_4
+        pose: [7.42,-3.24,0.0] # turn this left (more), v
+        room: kitchen
+      - name: tbm1_5
+        pose: [6.17,-3.36,0.0] # >
+        room: dining_room
+      - name: tbm1_6
+        pose: [6.14,-5.45,0.0] # ^
+        room: dining_room
+      - name: tbm1_7
+        pose: [7.58,-7.16,0.0] # >
         room: living_room
+      - name: tbm1_8
+        pose: [7.6,-8.32,0.0] # v
+        room: living_room
+      - name: tbm1_9
+        pose: [6.05,-8.23,0.0] # <
+        room: living_room
+      - name: tbm1_10
+        pose: [5.94,-6.09,0.0] # <
+        room: living_room
+        # After entering bedroom
+        # go through bed
+      - name: tbm1_11
+        pose: [2.45,-7.4,0.0] #v
+        room: bedroom
+        # come back
+      - name: tbm1_12_pre
+        pose: [3.89,-4.33,0.0]
+        room: bedroom
+      - name: tbm1_12
+        pose: [2.49,-4.5,0.0] #v
+        room: bedroom
+        # Go to bathroom just doors
+      - name: tbm1_13
+        pose: [5.76,-4.29,0.0]
+        room: dining_room
+
+
 
 
 paths: # type 0 door type 1 waypoint
-      - name: survey1
+      - name: tbm1_survey
         poses:
             - type: 0
               name: entrance_corridor
               forward: true
-            - type: 0
-              name: bathroom_kitchen
-              forward: false
-            - type: 0
-              name: bedroom_bathroom
-              forward: false
+            - type: 1
+              name: tbm1_1
+            - type: 1
+              name: tbm1_2
+            - type: 1
+              name: tbm1_3
+            - type: 1
+              name: tbm1_4
+            - type: 1
+              name: tbm1_5
+            - type: 1
+              name: tbm1_6
+            - type: 1
+              name: tbm1_7
+            - type: 1
+              name: tbm1_8
+            - type: 1
+              name: tbm1_9
+            - type: 1
+              name: tbm1_10
+            #GO TO BEDROOM
             - type: 0
               name: livingroom_bedroom
-              forward: false
-            - type: 0
-              name: fake_door
               forward: true
             - type: 0
-              name: bathroom_kitchen
+              name: side_bed_con
+              forward: true
+            - type: 1
+              name: tbm1_11
+            - type: 0
+              name: side_bed_con
               forward: false
+            - type: 1
+              name: tbm1_12_pre
+            - type: 1
+              name: tbm1_12
+              # Go to bathroom
             - type: 0
               name: bedroom_bathroom
-              forward: false
-            - type: 0
-              name: livingroom_bedroom
-              forward: false
-            - type: 0
-              name: fake_door
               forward: true
+              # Go to kitchen and livingroom
+            - type: 0
+              name: bathroom_kitchen
+              forward: true
+            - type: 1
+              name: tbm1_13
+
       - name: survey2
         poses:
             - type: 0
