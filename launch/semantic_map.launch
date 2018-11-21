@@ -1,9 +1,10 @@
 <launch>
-    <!--<arg name="marker1Id"         default="582"/>-->
+    <arg name="semantic_tf" default="true"/>
 
 
-    <!--<node pkg="tf" type="static_transform_publisher" name="map_align" args="0 0 0 -0.15 0 0 map map_align 100" />-->
-
+    <group if="$semantic_tf">
+        <node pkg="tf" type="static_transform_publisher" name="map_align" args="0 0 0 -0.15 0 0 map map_align 100" />
+    </group>
 
     <rosparam command="load" file="$(find robot_map)/config/semantic_map.yaml" />
 
