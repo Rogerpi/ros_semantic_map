@@ -263,7 +263,7 @@ waypoints:
 
 
 paths: # type 0 door type 1 waypoint
-      - name: tbm1_survey
+      - name: surveyTBM1
         poses:
             - type: 0
               name: entrance_corridor
