@@ -138,7 +138,7 @@ class Landmark:
     def send_goal(self,client): #TODO n attempts?
 
         goal = MoveBaseGoal()
-        goal.target_pose.header.frame_id = "map"
+        goal.target_pose.header.frame_id = self.frame_id
         goal.target_pose.header.stamp = rospy.Time.now()
         goal.target_pose.pose.position.x = self.pose[0]
         goal.target_pose.pose.position.y = self.pose[1]
